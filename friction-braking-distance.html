@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#142640">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<title>Friction and Braking Distance</title>
+<style>
+  :root {
+    --navy: #142640; --navy2: #1F3559; --ink: #0F1B3D; --orange: #F28C28; --orange-dk: #C86A12;
+    --teal: #1FA3A3; --teal-dk: #157B7B; --red: #D9534F; --purple: #7A5AC8; --green: #2E9E5B;
+    --bg: #F3F5F9; --card: #FFFFFF; --line: #E1E5EE; --text: #142640; --muted: #5E6A85;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--text); font-family: "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.45; }
+  header { background: var(--navy); color: #fff; padding: 18px 16px 0; }
+  .wrap { max-width: 1200px; margin: 0 auto; }
+  .kicker { color: var(--orange); font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+  h1 { margin: 4px 0 2px; font-family: Cambria, Georgia, serif; font-size: clamp(24px, 4vw, 34px); }
+  .sub { color: #C9D0DF; margin: 0 0 14px; font-size: 15px; }
+  .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+  .tab { background: transparent; border: 0; color: #C9D0DF; font: inherit; font-weight: 600; font-size: 15px; padding: 12px 16px;
+         border-radius: 10px 10px 0 0; cursor: pointer; }
+  .tab[aria-selected="true"] { background: var(--bg); color: var(--navy); }
+  .tab:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+  main { padding: 18px 16px 30px; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1.618fr) minmax(0, 1fr); gap: 18px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border-radius: 14px; padding: 16px; box-shadow: 0 1px 3px rgba(20, 38, 64, .08); }
+  .card h2 { margin: 0 0 10px; font-family: Cambria, Georgia, serif; font-size: 20px; }
+  .label { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--orange-dk); margin-bottom: 6px; }
+  svg { display: block; width: 100%; height: auto; }
+  .status { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 15px; }
+  .st-rest { background: #DFF3EC; color: #1C6E45; }
+  .st-edge { background: #FDEBD6; color: #9A520C; }
+  .st-slide { background: #FBE1E0; color: #A73733; }
+  .st-bottom { background: #E6E9F2; color: var(--navy); }
+  .ctrl { margin: 14px 0; }
+  .ctrl-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .ctrl label { font-weight: 600; }
+  .val { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--navy); }
+  input[type=range] { width: 100%; height: 34px; accent-color: var(--orange); cursor: pointer; }
+  select { width: 100%; font: inherit; padding: 9px 10px; border-radius: 10px; border: 1px solid var(--line); background: #fff; color: var(--text); }
+  .toggles { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 6px; }
+  .toggles label { display: inline-flex; gap: 6px; align-items: center; font-size: 14px; cursor: pointer; }
+  .toggles input { width: 18px; height: 18px; accent-color: var(--teal); }
+  .btn { font: inherit; font-weight: 700; border: 0; border-radius: 12px; padding: 12px 18px; cursor: pointer; min-height: 46px; }
+  .btn-primary { background: var(--orange); color: #fff; }
+  .btn-teal { background: var(--teal); color: #fff; }
+  .btn-ghost { background: var(--bg); color: var(--navy); border: 1px solid var(--line); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btnrow { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  table.read { width: 100%; border-collapse: collapse; font-size: 15px; }
+  table.read td { padding: 7px 0; border-bottom: 1px solid var(--line); }
+  table.read td:last-child { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 8px; vertical-align: -1px; }
+  .formula { font-family: Cambria, Georgia, serif; font-style: italic; color: var(--muted); font-size: 14px; }
+  .note { background: #FFF6EC; border-radius: 10px; padding: 10px 12px; font-size: 14px; color: #6B4210; margin-top: 12px; }
+  .below { display: grid; grid-template-columns: minmax(0, 1.618fr) minmax(0, 1fr); gap: 18px; margin-top: 18px; }
+  @media (max-width: 900px) { .below { grid-template-columns: 1fr; } }
+  details { border-bottom: 1px solid var(--line); padding: 8px 0; }
+  details summary { cursor: pointer; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 8px; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "+"; color: var(--orange-dk); font-weight: 700; }
+  details[open] summary::after { content: "–"; }
+  details p { margin: 6px 0 2px; font-size: 14px; }
+  .log { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+  .log th, .log td { padding: 6px 6px; border-bottom: 1px solid var(--line); text-align: left; }
+  .log th { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  .q { font-size: 18px; font-weight: 600; margin: 4px 0 8px; }
+  .fb { margin-top: 12px; padding: 12px; border-radius: 10px; font-size: 15px; display: none; }
+  .fb.ok { background: #DFF3EC; color: #1C6E45; display: block; }
+  .fb.no { background: #FBE1E0; color: #A73733; display: block; }
+  .score { font-weight: 700; color: var(--navy); }
+  .hidden { display: none !important; }
+  body.simple .adv { display: none !important; }
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 10px 16px 24px; }
+  .unitnav { background: #0F1B3D; }
+  .unitnav .wrap { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 16px; flex-wrap: wrap; }
+  .unitnav a { color: #fff; text-decoration: none; font-weight: 600; font-size: 14px; padding: 6px 10px; border-radius: 8px; }
+  .unitnav a:hover, .unitnav a:focus-visible { background: #1F3559; outline: none; }
+  .unitnav .pos { color: #A9B1C6; font-size: 13px; }
+  .unitnav .nx { display: flex; gap: 6px; }
+</style>
+</head>
+<body>
+<nav class="unitnav" aria-label="Unit navigation"><div class="wrap"><a href="index.html">← All lessons</a><span class="pos">Lesson 3 of 4</span><span class="nx"><a href="friction-inclined-plane.html">← Prev</a><a href="friction-banked-roads.html">Next: Friction on curves and banked roads →</a></span></div></nav>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">Physics · Friction · Lesson 3</div>
+    <h1>Friction and Braking Distance</h1>
+    <p class="sub">A child steps onto a zebra crossing ahead. Can the car stop in time? Friction between the tyres and the road decides.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="card" aria-label="Simulation">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+      <span id="status" class="status st-rest">Ready</span>
+      <span class="formula" id="tag"></span>
+    </div>
+    <svg id="sim" viewBox="0 0 1100 260" role="img" aria-label="A car on a road braking before a zebra crossing"><g id="scene"></g></svg>
+    <div class="btnrow">
+      <button class="btn btn-primary" id="goBtn">▶ Start: the child steps out</button>
+      <button class="btn btn-ghost" id="resetBtn">↺ Reset</button>
+    </div>
+  </section>
+
+  <div class="grid" style="margin-top:18px">
+    <section class="card" aria-label="Graph">
+      <h2>Stopping distance grows faster than speed</h2>
+      <svg id="graph" viewBox="0 0 640 300" role="img" aria-label="Graph of stopping distance against speed"></svg>
+      <p class="formula" style="margin:6px 0 0">Reaction distance grows in step with speed; braking distance grows with speed squared. Double the speed and the braking distance becomes four times as long.</p>
+    </section>
+
+    <section class="card" aria-label="Controls">
+      <div class="label">Controls</div>
+      <div class="ctrl">
+        <div class="ctrl-row"><label for="speed">Speed of the car</label><span class="val" id="speedV"></span></div>
+        <input type="range" id="speed" min="20" max="100" step="5" value="50">
+      </div>
+      <div class="ctrl">
+        <label for="road">Road surface</label>
+        <select id="road">
+          <option value="dry" selected>Dry tar road (μ ≈ 0.7)</option>
+          <option value="wet">Wet road after rain (μ ≈ 0.4)</option>
+          <option value="gravel">Loose gravel (μ ≈ 0.35)</option>
+          <option value="ice">Icy road (μ ≈ 0.1)</option>
+        </select>
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-row"><label for="react">Driver's reaction time</label><span class="val" id="reactV"></span></div>
+        <input type="range" id="react" min="0.5" max="2.5" step="0.1" value="1">
+        <div class="formula">Alert driver ≈ 1 s · distracted by a phone ≈ 2 s or more</div>
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-row"><label for="cross">Distance to the crossing</label><span class="val" id="crossV"></span></div>
+        <input type="range" id="cross" min="15" max="80" step="1" value="35">
+      </div>
+      <div class="label" style="margin-top:16px">Results</div>
+      <table class="read" aria-live="polite">
+        <tr><td>Speed, v</td><td id="rV"></td></tr>
+        <tr><td><span class="sw" style="background:#F28C28"></span>Reaction distance = v × t</td><td id="rR"></td></tr>
+        <tr><td><span class="sw" style="background:#D9534F"></span>Braking distance = v² / (2μg)</td><td id="rB"></td></tr>
+        <tr><td><b>Total stopping distance</b></td><td id="rT"></td></tr>
+        <tr><td>Deceleration from friction, a = μg</td><td id="rA"></td></tr>
+      </table>
+    </section>
+  </div>
+
+  <div class="below">
+    <section class="card">
+      <h2>Try this</h2>
+      <ol style="margin:0;padding-left:20px;display:grid;gap:10px">
+        <li>Set 40 km/h, then 80 km/h. How many times longer is the <b>braking</b> distance? Why is it not just twice?</li>
+        <li>Keep the speed the same and change from a dry road to a wet road. What changed, and why?</li>
+        <li>Change the reaction time from 1 s to 2 s. Which part of the stopping distance grows?</li>
+        <li>Near a school the limit is often 25 km/h. Find the stopping distance at 25 km/h on a wet road.</li>
+      </ol>
+    </section>
+    <section class="card">
+      <h2>Key terms</h2>
+      <details open><summary><span>Friction and braking</span></summary><p>When the driver brakes, friction between the tyres and the road is the force that slows the car. On level road it gives a deceleration of about <i>a = μg</i>.</p></details>
+      <details><summary><span>Reaction distance</span></summary><p>Distance travelled while the driver notices the danger and moves to the brake: <i>speed × reaction time</i>. The car is still at full speed.</p></details>
+      <details><summary><span>Braking distance</span></summary><p>Distance travelled after the brakes are applied: <i>v² / (2μg)</i>. It depends on speed squared and on the road's friction.</p></details>
+      <details><summary><span>Stopping distance</span></summary><p>Reaction distance + braking distance.</p></details>
+      <details><summary><span>Why tyres have treads</span></summary><p>Treads push water away so rubber stays in contact with the road, keeping friction high on wet roads.</p></details>
+    </section>
+  </div>
+  <div class="note" style="margin-top:18px">A simplified model for learning: level road, constant friction while braking, typical coefficient values and g = 9.8 m/s². Real stopping distances also depend on tyres, brakes and load. Not a driving guide.</div>
+</main>
+<footer>Built with AI · Hosted on GitHub · Works offline once opened</footer>
+
+<script>
+(() => {
+  const g = 9.8, $ = id => document.getElementById(id);
+  const MU = { dry: 0.7, wet: 0.4, gravel: 0.35, ice: 0.1 };
+  const ROADCOL = { dry: '#4A4F5C', wet: '#3B4A5E', gravel: '#8B7F6E', ice: '#BFD9E8' };
+  const S = { kmh: 50, mu: 0.7, road: 'dry', t: 1, cross: 35, running: false, time: 0, done: false };
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (t, a, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+
+  const calc = () => {
+    const v = S.kmh / 3.6, dr = v * S.t, db = v * v / (2 * S.mu * g), a = S.mu * g;
+    return { v, dr, db, total: dr + db, a, tStop: S.t + v / a };
+  };
+  const posAt = (C, t) => {             // distance travelled after the child steps out
+    if (t <= S.t) return C.v * t;
+    const tb = Math.min(t - S.t, C.v / C.a);
+    return C.dr + C.v * tb - 0.5 * C.a * tb * tb;
+  };
+
+  function car(p, x, y) {
+    el('rect', { x: x - 70, y: y - 30, width: 70, height: 26, rx: 8, fill: '#F28C28' }, p);
+    el('path', { d: `M${x - 58} ${y - 30} L${x - 48} ${y - 48} L${x - 20} ${y - 48} L${x - 10} ${y - 30}Z`, fill: '#F28C28' }, p);
+    el('path', { d: `M${x - 54} ${y - 31} L${x - 46} ${y - 44} L${x - 22} ${y - 44} L${x - 15} ${y - 31}Z`, fill: '#CFE3F2' }, p);
+    [x - 55, x - 16].forEach(cx => el('circle', { cx, cy: y - 4, r: 10, fill: '#142640' }, p));
+  }
+
+  function draw() {
+    const C = calc(), sc = $('scene'); sc.innerHTML = '';
+    const X0 = 110, span = Math.max(C.total, S.cross) * 1.12 + 5, W = 950, k = W / span, RY = 170;
+    el('rect', { x: 0, y: 0, width: 1100, height: 120, fill: '#DCEBF7' }, sc);
+    el('rect', { x: 0, y: 120, width: 1100, height: 100, fill: ROADCOL[S.road] }, sc);
+    el('rect', { x: 0, y: 220, width: 1100, height: 40, fill: '#9BBF7A' }, sc);
+    for (let i = 0; i < 30; i++) el('rect', { x: i * 60, y: 168, width: 30, height: 4, fill: '#ffffff88' }, sc);
+    // distance ruler
+    const step = span > 300 ? 50 : span > 120 ? 20 : 10;
+    for (let d = 0; d <= span; d += step) {
+      el('line', { x1: X0 + d * k, y1: 222, x2: X0 + d * k, y2: 232, stroke: '#3D5A2A', 'stroke-width': 2 }, sc);
+      el('text', { x: X0 + d * k, y: 250, 'text-anchor': 'middle', 'font-size': 13, fill: '#28401B' }, sc).textContent = `${d} m`;
+    }
+    // zebra crossing + child
+    const cx = X0 + S.cross * k;
+    for (let i = 0; i < 6; i++) el('rect', { x: cx, y: 124 + i * 16, width: 22, height: 9, fill: '#fff', opacity: .9 }, sc);
+    el('circle', { cx: cx + 11, cy: 80, r: 10, fill: '#C68B5E' }, sc);
+    el('rect', { x: cx + 2, y: 90, width: 18, height: 30, rx: 6, fill: '#1FA3A3' }, sc);
+    // distance travelled so far
+    const t = S.running || S.done ? S.time : 0, d = posAt(C, t);
+    // reaction and braking bands
+    const rEnd = Math.min(d, C.dr);
+    if (d > 0) el('rect', { x: X0, y: 196, width: rEnd * k, height: 10, fill: '#F28C28' }, sc);
+    if (d > C.dr) el('rect', { x: X0 + C.dr * k, y: 196, width: (d - C.dr) * k, height: 10, fill: '#D9534F' }, sc);
+    if (d > C.dr) for (let i = 0; i < 2; i++) el('line', { x1: X0 + C.dr * k, y1: 175 + i * 6, x2: X0 + d * k, y2: 175 + i * 6, stroke: '#1B1B1B', 'stroke-width': 3, opacity: .35 }, sc);
+    // planned markers (faint) when not yet run
+    if (!S.running && !S.done) {
+      el('rect', { x: X0, y: 196, width: C.dr * k, height: 10, fill: '#F28C28', opacity: .25 }, sc);
+      el('rect', { x: X0 + C.dr * k, y: 196, width: C.db * k, height: 10, fill: '#D9534F', opacity: .25 }, sc);
+    }
+    car(sc, X0 + d * k, 172);
+    el('text', { x: X0 - 6, y: 112, 'text-anchor': 'end', 'font-size': 13, fill: '#5E6A85' }, sc).textContent = 'Child seen';
+    el('line', { x1: X0, y1: 118, x2: X0, y2: 214, stroke: '#5E6A85', 'stroke-dasharray': '4 4' }, sc);
+    readouts(C, d);
+    graph(C);
+  }
+
+  function readouts(C, d) {
+    $('speedV').textContent = `${S.kmh} km/h`; $('reactV').textContent = `${S.t.toFixed(1)} s`; $('crossV').textContent = `${S.cross} m`;
+    $('rV').textContent = `${S.kmh} km/h = ${C.v.toFixed(1)} m/s`;
+    $('rR').textContent = `${C.dr.toFixed(1)} m`; $('rB').textContent = `${C.db.toFixed(1)} m`;
+    $('rT').textContent = `${C.total.toFixed(1)} m`; $('rA').textContent = `${C.a.toFixed(1)} m/s²`;
+    $('tag').textContent = `μ = ${S.mu}`;
+    const st = $('status');
+    if (S.running) { st.className = 'status st-edge'; st.textContent = S.time < S.t ? 'Reacting… still at full speed' : 'Braking: friction slows the car'; }
+    else if (S.done) {
+      const safe = C.total < S.cross;
+      st.className = 'status ' + (safe ? 'st-rest' : 'st-slide');
+      st.textContent = safe ? `Stopped ${(S.cross - C.total).toFixed(1)} m before the crossing` : `Did not stop in time: ${(C.total - S.cross).toFixed(1)} m past the crossing`;
+    } else { st.className = 'status st-bottom'; st.textContent = `Predict: will it stop within ${S.cross} m?`; }
+  }
+
+  const G = $('graph');
+  function graph(C) {
+    G.innerHTML = '';
+    const x0 = 60, y0 = 250, w = 550, h = 215;
+    const stop = kmh => { const v = kmh / 3.6; return v * S.t + v * v / (2 * S.mu * g); };
+    const maxD = Math.max(stop(100), S.cross) * 1.05;
+    const X = kmh => x0 + (kmh - 0) / 100 * w, Y = dd => y0 - dd / maxD * h;
+    el('line', { x1: x0, y1: y0, x2: x0 + w, y2: y0, stroke: '#8A93A8' }, G);
+    el('line', { x1: x0, y1: y0, x2: x0, y2: y0 - h, stroke: '#8A93A8' }, G);
+    for (let s = 0; s <= 100; s += 20) el('text', { x: X(s), y: y0 + 18, 'text-anchor': 'middle', 'font-size': 12, fill: '#5E6A85' }, G).textContent = s;
+    el('text', { x: x0 + w / 2, y: y0 + 38, 'text-anchor': 'middle', 'font-size': 13, fill: '#5E6A85' }, G).textContent = 'Speed (km/h)';
+    el('text', { x: 18, y: y0 - h / 2, 'text-anchor': 'middle', 'font-size': 13, fill: '#5E6A85', transform: `rotate(-90 18 ${y0 - h / 2})` }, G).textContent = 'Distance (m)';
+    let pr = '', pt = '';
+    for (let s = 0; s <= 100; s += 2) { const v = s / 3.6; pr += (pr ? 'L' : 'M') + X(s) + ' ' + Y(v * S.t); pt += (pt ? 'L' : 'M') + X(s) + ' ' + Y(stop(s)); }
+    el('path', { d: pr, fill: 'none', stroke: '#F28C28', 'stroke-width': 2.5 }, G);
+    el('path', { d: pt, fill: 'none', stroke: '#D9534F', 'stroke-width': 3.5 }, G);
+    el('line', { x1: x0, y1: Y(S.cross), x2: x0 + w, y2: Y(S.cross), stroke: '#1FA3A3', 'stroke-width': 2, 'stroke-dasharray': '6 5' }, G);
+    el('text', { x: x0 + 8, y: Y(S.cross) - 6, 'font-size': 12, fill: '#157B7B', 'font-weight': 700 }, G).textContent = `crossing at ${S.cross} m`;
+    el('text', { x: X(100) - 4, y: Y(stop(100)) + 16, 'text-anchor': 'end', 'font-size': 12, fill: '#D9534F', 'font-weight': 700 }, G).textContent = 'total stopping distance';
+    el('text', { x: X(100) - 4, y: Y(100 / 3.6 * S.t) - 8, 'text-anchor': 'end', 'font-size': 12, fill: '#C86A12' }, G).textContent = 'reaction distance';
+    el('circle', { cx: X(S.kmh), cy: Y(C.total), r: 7, fill: '#F28C28', stroke: '#fff', 'stroke-width': 2 }, G);
+  }
+
+  let last = performance.now();
+  function step(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (S.running) {
+      const C = calc(), speedUp = Math.max(1, C.tStop / 6);
+      S.time += dt * speedUp;
+      if (S.time >= C.tStop) { S.time = C.tStop; S.running = false; S.done = true; }
+    }
+    draw(); requestAnimationFrame(step);
+  }
+  const reset = () => { S.running = false; S.done = false; S.time = 0; };
+  $('speed').addEventListener('input', e => { S.kmh = +e.target.value; reset(); });
+  $('react').addEventListener('input', e => { S.t = +e.target.value; reset(); });
+  $('cross').addEventListener('input', e => { S.cross = +e.target.value; reset(); });
+  $('road').addEventListener('change', e => { S.road = e.target.value; S.mu = MU[S.road]; reset(); });
+  $('goBtn').addEventListener('click', () => { reset(); S.running = true; });
+  $('resetBtn').addEventListener('click', reset);
+  requestAnimationFrame(step);
+})();
+</script>
+</body>
+</html>

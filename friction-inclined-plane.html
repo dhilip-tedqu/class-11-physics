@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#142640">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<title>Friction on an Inclined Plane</title>
+<style>
+  :root {
+    --navy: #142640; --navy2: #1F3559; --ink: #0F1B3D; --orange: #F28C28; --orange-dk: #C86A12;
+    --teal: #1FA3A3; --teal-dk: #157B7B; --red: #D9534F; --purple: #7A5AC8; --green: #2E9E5B;
+    --bg: #F3F5F9; --card: #FFFFFF; --line: #E1E5EE; --text: #142640; --muted: #5E6A85;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--text); font-family: "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.45; }
+  header { background: var(--navy); color: #fff; padding: 18px 16px 0; }
+  .wrap { max-width: 1200px; margin: 0 auto; }
+  .kicker { color: var(--orange); font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+  h1 { margin: 4px 0 2px; font-family: Cambria, Georgia, serif; font-size: clamp(24px, 4vw, 34px); }
+  .sub { color: #C9D0DF; margin: 0 0 14px; font-size: 15px; }
+  .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+  .tab { background: transparent; border: 0; color: #C9D0DF; font: inherit; font-weight: 600; font-size: 15px; padding: 12px 16px;
+         border-radius: 10px 10px 0 0; cursor: pointer; }
+  .tab[aria-selected="true"] { background: var(--bg); color: var(--navy); }
+  .tab:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+  main { padding: 18px 16px 30px; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1.618fr) minmax(0, 1fr); gap: 18px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border-radius: 14px; padding: 16px; box-shadow: 0 1px 3px rgba(20, 38, 64, .08); }
+  .card h2 { margin: 0 0 10px; font-family: Cambria, Georgia, serif; font-size: 20px; }
+  .label { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--orange-dk); margin-bottom: 6px; }
+  svg { display: block; width: 100%; height: auto; }
+  .status { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 15px; }
+  .st-rest { background: #DFF3EC; color: #1C6E45; }
+  .st-edge { background: #FDEBD6; color: #9A520C; }
+  .st-slide { background: #FBE1E0; color: #A73733; }
+  .st-bottom { background: #E6E9F2; color: var(--navy); }
+  .ctrl { margin: 14px 0; }
+  .ctrl-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .ctrl label { font-weight: 600; }
+  .val { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--navy); }
+  input[type=range] { width: 100%; height: 34px; accent-color: var(--orange); cursor: pointer; }
+  select { width: 100%; font: inherit; padding: 9px 10px; border-radius: 10px; border: 1px solid var(--line); background: #fff; color: var(--text); }
+  .toggles { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 6px; }
+  .toggles label { display: inline-flex; gap: 6px; align-items: center; font-size: 14px; cursor: pointer; }
+  .toggles input { width: 18px; height: 18px; accent-color: var(--teal); }
+  .btn { font: inherit; font-weight: 700; border: 0; border-radius: 12px; padding: 12px 18px; cursor: pointer; min-height: 46px; }
+  .btn-primary { background: var(--orange); color: #fff; }
+  .btn-teal { background: var(--teal); color: #fff; }
+  .btn-ghost { background: var(--bg); color: var(--navy); border: 1px solid var(--line); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btnrow { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  table.read { width: 100%; border-collapse: collapse; font-size: 15px; }
+  table.read td { padding: 7px 0; border-bottom: 1px solid var(--line); }
+  table.read td:last-child { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 8px; vertical-align: -1px; }
+  .formula { font-family: Cambria, Georgia, serif; font-style: italic; color: var(--muted); font-size: 14px; }
+  .note { background: #FFF6EC; border-radius: 10px; padding: 10px 12px; font-size: 14px; color: #6B4210; margin-top: 12px; }
+  .below { display: grid; grid-template-columns: minmax(0, 1.618fr) minmax(0, 1fr); gap: 18px; margin-top: 18px; }
+  @media (max-width: 900px) { .below { grid-template-columns: 1fr; } }
+  details { border-bottom: 1px solid var(--line); padding: 8px 0; }
+  details summary { cursor: pointer; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 8px; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "+"; color: var(--orange-dk); font-weight: 700; }
+  details[open] summary::after { content: "–"; }
+  details p { margin: 6px 0 2px; font-size: 14px; }
+  .log { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+  .log th, .log td { padding: 6px 6px; border-bottom: 1px solid var(--line); text-align: left; }
+  .log th { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  .q { font-size: 18px; font-weight: 600; margin: 4px 0 8px; }
+  .fb { margin-top: 12px; padding: 12px; border-radius: 10px; font-size: 15px; display: none; }
+  .fb.ok { background: #DFF3EC; color: #1C6E45; display: block; }
+  .fb.no { background: #FBE1E0; color: #A73733; display: block; }
+  .score { font-weight: 700; color: var(--navy); }
+  .hidden { display: none !important; }
+  body.simple .adv { display: none !important; }
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 10px 16px 24px; }
+  .unitnav { background: #0F1B3D; }
+  .unitnav .wrap { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 16px; flex-wrap: wrap; }
+  .unitnav a { color: #fff; text-decoration: none; font-weight: 600; font-size: 14px; padding: 6px 10px; border-radius: 8px; }
+  .unitnav a:hover, .unitnav a:focus-visible { background: #1F3559; outline: none; }
+  .unitnav .pos { color: #A9B1C6; font-size: 13px; }
+  .unitnav .nx { display: flex; gap: 6px; }
+</style>
+</head>
+<body>
+<nav class="unitnav" aria-label="Unit navigation"><div class="wrap"><a href="index.html">← All lessons</a><span class="pos">Lesson 2 of 4</span><span class="nx"><a href="friction-static-kinetic.html">← Prev</a><a href="friction-braking-distance.html">Next: Friction and braking distance →</a></span></div></nav>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">Physics · Friction · Lesson 2</div>
+    <h1>Friction on an Inclined Plane</h1>
+    <p class="sub">Tilt the plane, change the surface and watch every force. Find the angle at which the block just starts to slide.</p>
+    <div class="tabs" role="tablist" aria-label="Modes">
+      <button class="tab" role="tab" aria-selected="true" data-mode="explore">1 · Explore</button>
+      <button class="tab" role="tab" aria-selected="false" data-mode="find">2 · Find the angle of repose</button>
+      <button class="tab" role="tab" aria-selected="false" data-mode="predict">3 · Predict</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="grid">
+    <!-- Simulation -->
+    <section class="card" aria-label="Simulation">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <span id="status" class="status st-rest">At rest</span>
+        <span class="formula" id="reposeTag"></span>
+      </div>
+      <svg id="sim" viewBox="0 0 720 500" role="img" aria-label="Block on an inclined plane with force arrows">
+        <defs>
+          <marker id="mW" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#142640"/></marker>
+          <marker id="mN" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1FA3A3"/></marker>
+          <marker id="mF" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#D9534F"/></marker>
+          <marker id="mC" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7A5AC8"/></marker>
+          <pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="10" stroke="#C9D0DF" stroke-width="3"/></pattern>
+        </defs>
+        <rect x="0" y="370" width="720" height="22" fill="url(#hatch)"/>
+        <line x1="0" y1="370" x2="720" y2="370" stroke="#8A93A8" stroke-width="2"/>
+        <g id="scene"></g>
+      </svg>
+      <div class="toggles">
+        <label><input type="checkbox" id="tForces" checked> Show forces</label>
+        <label class="adv"><input type="checkbox" id="tComp" checked> Show components</label>
+        <label><input type="checkbox" id="tVals" checked> Show values</label>
+        <label><input type="checkbox" id="tSimple"> Simple view (Class 8–9)</label>
+      </div>
+    </section>
+
+    <!-- Right column: controls + readouts -->
+    <section class="card" aria-label="Controls">
+      <!-- Explore controls -->
+      <div id="panelExplore">
+        <div class="label">Controls</div>
+        <div class="ctrl">
+          <div class="ctrl-row"><label for="angle">Angle of incline (θ)</label><span class="val" id="angleV"></span></div>
+          <input type="range" id="angle" min="0" max="60" step="0.5" value="15">
+        </div>
+        <div class="ctrl">
+          <label for="surface">Surfaces in contact</label>
+          <select id="surface">
+            <option value="ice">Ice on ice (very smooth)</option>
+            <option value="wood" selected>Wood on wood</option>
+            <option value="steel">Steel on steel (dry)</option>
+            <option value="rubber">Rubber on concrete (very rough)</option>
+            <option value="custom">Custom</option>
+          </select>
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-row"><label for="mus">Coefficient of static friction (μ<sub>s</sub>)</label><span class="val" id="musV"></span></div>
+          <input type="range" id="mus" min="0.05" max="1.2" step="0.01" value="0.5">
+        </div>
+        <div class="ctrl adv">
+          <div class="ctrl-row"><label for="muk">Coefficient of kinetic friction (μ<sub>k</sub>)</label><span class="val" id="mukV"></span></div>
+          <input type="range" id="muk" min="0.02" max="1.2" step="0.01" value="0.3">
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-row"><label for="mass">Mass of block (m)</label><span class="val" id="massV"></span></div>
+          <input type="range" id="mass" min="1" max="10" step="0.5" value="2">
+        </div>
+        <div class="btnrow">
+          <button class="btn btn-ghost" id="resetBtn">↺ Put block back at the top</button>
+        </div>
+      </div>
+
+      <!-- Find mode -->
+      <div id="panelFind" class="hidden">
+        <div class="label">Experiment</div>
+        <p style="margin:0 0 6px">Start flat. Tilt the plane slowly. Stop the moment the block starts to slide: that angle is the <b>angle of repose</b>.</p>
+        <div class="ctrl">
+          <label for="surface2">Surfaces in contact</label>
+          <select id="surface2">
+            <option value="ice">Ice on ice</option>
+            <option value="wood" selected>Wood on wood</option>
+            <option value="steel">Steel on steel (dry)</option>
+            <option value="rubber">Rubber on concrete</option>
+          </select>
+        </div>
+        <div class="ctrl">
+          <div class="ctrl-row"><label for="mass2">Mass of block (m)</label><span class="val" id="mass2V"></span></div>
+          <input type="range" id="mass2" min="1" max="10" step="0.5" value="2">
+        </div>
+        <div class="btnrow">
+          <button class="btn btn-primary" id="raiseBtn">▲ Raise slowly</button>
+          <button class="btn btn-ghost" id="clearLog">Clear table</button>
+        </div>
+        <table class="log" aria-label="Trials">
+          <thead><tr><th>#</th><th>Surface</th><th>Mass</th><th>Slipped at</th><th class="adv">tan⁻¹ μ<sub>s</sub></th></tr></thead>
+          <tbody id="logBody"></tbody>
+        </table>
+        <div class="note" id="findHint">Try the same surface with a different mass. Does the angle change?</div>
+      </div>
+
+      <!-- Predict mode -->
+      <div id="panelPredict" class="hidden">
+        <div class="label">Predict, then test <span class="score" id="score" style="float:right"></span></div>
+        <p class="q" id="pq"></p>
+        <p class="formula" id="pinfo"></p>
+        <div class="btnrow">
+          <button class="btn btn-teal" id="pStay">It will stay at rest</button>
+          <button class="btn btn-primary" id="pSlide">It will slide</button>
+        </div>
+        <div class="fb" id="pfb"></div>
+        <div class="btnrow"><button class="btn btn-ghost hidden" id="pNext">Next question →</button></div>
+      </div>
+
+      <div class="label" style="margin-top:18px">Live values</div>
+      <table class="read" aria-live="polite">
+        <tr><td><span class="sw" style="background:#142640"></span>Weight, W = mg</td><td id="rW"></td></tr>
+        <tr class="adv"><td><span class="sw" style="background:#7A5AC8"></span>Along the slope, mg sin θ</td><td id="rPar"></td></tr>
+        <tr><td><span class="sw" style="background:#1FA3A3"></span>Normal force, N = mg cos θ</td><td id="rN"></td></tr>
+        <tr><td><span class="sw" style="background:#D9534F"></span>Friction acting now, f</td><td id="rF"></td></tr>
+        <tr class="adv"><td><span class="sw" style="background:#fff;border:2px dashed #D9534F"></span>Limiting friction, μ<sub>s</sub>N</td><td id="rLim"></td></tr>
+        <tr><td>Angle of repose, θ<sub>r</sub> = tan⁻¹ μ<sub>s</sub></td><td id="rRep"></td></tr>
+        <tr class="adv"><td>Acceleration, a = g(sin θ − μ<sub>k</sub> cos θ)</td><td id="rA"></td></tr>
+      </table>
+    </section>
+  </div>
+
+  <div class="below">
+    <section class="card adv" aria-label="Graph">
+      <h2>Friction as the plane tilts</h2>
+      <svg id="graph" viewBox="0 0 640 300" role="img" aria-label="Graph of friction force against angle of incline"></svg>
+      <p class="formula" style="margin:6px 0 0">Static friction rises with the angle until it reaches its limit at θ<sub>r</sub>. Then the block slides and friction drops to kinetic friction, μ<sub>k</sub>N.</p>
+    </section>
+
+    <section class="card" aria-label="Glossary">
+      <h2>Key terms</h2>
+      <details open><summary><span>Friction</span></summary><p>A force that opposes sliding between two surfaces in contact. It acts along the surface.</p></details>
+      <details><summary><span>Normal force (N)</span></summary><p>The push of the surface on the block, at right angles to the surface. On an incline, <i>N = mg cos θ</i>, so it gets smaller as the plane gets steeper.</p></details>
+      <details><summary><span>Static friction</span></summary><p>Friction while the block is at rest. It adjusts itself to exactly balance the pull along the slope, up to a maximum.</p></details>
+      <details><summary><span>Limiting friction</span></summary><p>The maximum static friction: <i>f<sub>max</sub> = μ<sub>s</sub>N</i>. When the pull along the slope exceeds this, the block starts to slide.</p></details>
+      <details><summary><span>Kinetic friction</span></summary><p>Friction while the block is sliding: <i>f<sub>k</sub> = μ<sub>k</sub>N</i>. It is usually less than limiting friction, so it is easier to keep something moving than to start it.</p></details>
+      <details><summary><span>Coefficient of friction (μ)</span></summary><p>A number that tells how rough a pair of surfaces is. It has no unit. Higher μ means more grip.</p></details>
+      <details><summary><span>Angle of repose (θ<sub>r</sub>)</span></summary><p>The largest angle at which the block stays at rest on the incline; also called the limiting angle. At this angle <i>tan θ<sub>r</sub> = μ<sub>s</sub></i>. It does not depend on mass.</p></details>
+      <details><summary><span>Angle of friction (λ)</span></summary><p>The angle between the normal force and the resultant of normal force and limiting friction: <i>tan λ = μ<sub>s</sub></i>. So the angle of friction equals the angle of repose.</p></details>
+    </section>
+  </div>
+
+  <div class="note" style="margin-top:18px">This is a simplified model for learning: it assumes a rigid block, no air resistance, constant coefficients and g = 9.8 m/s². Coefficients for the surfaces are typical textbook values; real values vary with condition and cleanliness.</div>
+</main>
+<footer>Built with AI · Hosted on GitHub · Works offline once opened</footer>
+
+<script>
+(() => {
+  const g = 9.8;
+  const SURF = {
+    ice:    { name: 'Ice on ice',          mus: 0.10, muk: 0.03 },
+    wood:   { name: 'Wood on wood',        mus: 0.50, muk: 0.30 },
+    steel:  { name: 'Steel on steel',      mus: 0.74, muk: 0.57 },
+    rubber: { name: 'Rubber on concrete',  mus: 1.00, muk: 0.80 },
+  };
+  const $ = id => document.getElementById(id);
+  const deg = r => r * 180 / Math.PI, rad = d => d * Math.PI / 180;
+
+  // ---------- state ----------
+  const S = { mode: 'explore', theta: 15, mus: 0.5, muk: 0.3, m: 2, surface: 'wood',
+              s: 0, v: 0, moving: false, atBottom: false, raising: false, predict: null, score: 0, asked: 0 };
+  const L = 400, PIV = { x: 640, y: 370 }, BW = 78, BH = 50, START = 120;
+  S.s = START;
+
+  // ---------- physics helpers ----------
+  const forces = () => {
+    const th = rad(S.theta), W = S.m * g, par = W * Math.sin(th), N = W * Math.cos(th), lim = S.mus * N, kin = S.muk * N;
+    let f, state;
+    if (S.atBottom) { f = 0; state = 'bottom'; }
+    else if (S.moving) { f = kin; state = 'slide'; }
+    else { f = Math.min(par, lim); state = par > lim - 1e-9 ? 'slide' : (par > 0.93 * lim ? 'edge' : 'rest'); }
+    const a = S.moving ? g * (Math.sin(th) - S.muk * Math.cos(th)) : 0;
+    return { W, par, N, lim, kin, f, state, a, repose: deg(Math.atan(S.mus)) };
+  };
+
+  // ---------- drawing ----------
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+  const scene = $('scene');
+
+  function arrow(parent, x1, y1, dx, dy, color, marker, dash, label, lx, ly) {
+    const len = Math.hypot(dx, dy);
+    if (len < 4) return;
+    el('line', { x1, y1, x2: x1 + dx, y2: y1 + dy, stroke: color, 'stroke-width': dash ? 3 : 4.5, 'stroke-dasharray': dash ? '7 5' : '', 'marker-end': `url(#${marker})`, 'stroke-linecap': 'round' }, parent);
+    if (label) {
+      const t = el('text', { x: lx, y: ly, fill: color, 'font-size': 15, 'font-weight': 700, 'font-family': 'Segoe UI, Arial, sans-serif', 'text-anchor': 'middle', 'paint-order': 'stroke', stroke: '#fff', 'stroke-width': 4 }, parent);
+      t.textContent = label;
+    }
+  }
+
+  function draw() {
+    const F = forces(), th = rad(S.theta);
+    const d = { x: -Math.cos(th), y: -Math.sin(th) };            // from pivot up the slope
+    const top = { x: PIV.x + d.x * L, y: PIV.y + d.y * L };
+    const down = { x: Math.cos(th), y: Math.sin(th) };           // down the slope
+    const n = { x: Math.sin(th), y: -Math.cos(th) };             // outward normal (up)
+    scene.innerHTML = '';
+    // plane
+    el('polygon', { points: `${PIV.x},${PIV.y} ${top.x},${top.y} ${top.x},${PIV.y}`, fill: '#E7DCCB', stroke: '#8A6A4A', 'stroke-width': 2 }, scene);
+    el('line', { x1: top.x, y1: top.y, x2: PIV.x, y2: PIV.y, stroke: '#6B4E33', 'stroke-width': 5, 'stroke-linecap': 'round' }, scene);
+    // angle arc at pivot
+    const r = 70, a0 = Math.PI, a1 = Math.PI + th;
+    if (S.theta > 0.5) {
+      el('path', { d: `M${PIV.x - r} ${PIV.y} A${r} ${r} 0 0 1 ${PIV.x + r * Math.cos(a1)} ${PIV.y + r * Math.sin(a1)}`, fill: 'none', stroke: '#C86A12', 'stroke-width': 2.5 }, scene);
+      const am = (a0 + a1) / 2;
+      const t = el('text', { x: PIV.x + (r + 26) * Math.cos(am), y: PIV.y + (r + 26) * Math.sin(am) + 5, fill: '#C86A12', 'font-size': 17, 'font-weight': 700, 'text-anchor': 'middle', 'font-family': 'Cambria, Georgia, serif' }, scene);
+      t.textContent = `θ = ${S.theta.toFixed(1)}°`;
+    }
+    // angle-of-repose marker (ghost line)
+    {
+      const rr = rad(F.repose);
+      if (F.repose <= 62) {
+        el('line', { x1: PIV.x, y1: PIV.y, x2: PIV.x - Math.cos(rr) * (L + 20), y2: PIV.y - Math.sin(rr) * (L + 20), stroke: '#C86A12', 'stroke-width': 1.5, 'stroke-dasharray': '6 6', opacity: .7 }, scene);
+        const t = el('text', { x: PIV.x - Math.cos(rr) * (L + 28), y: PIV.y - Math.sin(rr) * (L + 28), fill: '#C86A12', 'font-size': 13, 'font-weight': 700, 'text-anchor': 'middle' }, scene);
+        t.textContent = `θr ${F.repose.toFixed(1)}°`;
+      }
+    }
+    // block
+    const sMax = L - BW - 6;
+    const P = { x: top.x + down.x * (S.s + BW / 2), y: top.y + down.y * (S.s + BW / 2) };   // contact point (block's bottom centre)
+    const blk = el('g', { transform: `translate(${P.x} ${P.y}) rotate(${S.theta})` }, scene);
+    el('rect', { x: -BW / 2, y: -BH, width: BW, height: BH, rx: 6, fill: '#F28C28', stroke: '#C86A12', 'stroke-width': 2 }, blk);
+    const mt = el('text', { x: 0, y: -BH / 2 + 6, 'text-anchor': 'middle', fill: '#fff', 'font-size': 16, 'font-weight': 700 }, blk);
+    mt.textContent = `${S.m} kg`;
+    const C = { x: P.x + n.x * BH / 2, y: P.y + n.y * BH / 2 };
+    el('circle', { cx: C.x, cy: C.y, r: 4, fill: '#142640' }, scene);
+
+    if ($('tForces').checked) {
+      const k = 110 / F.W;              // weight arrow is always 110 px; others in proportion
+      const vals = $('tVals').checked, simple = document.body.classList.contains('simple');
+      // weight
+      arrow(scene, C.x, C.y, 0, F.W * k, '#142640', 'mW', false, vals ? `W = ${F.W.toFixed(1)} N` : 'W', C.x + 6, C.y + F.W * k + 22);
+      // components
+      if ($('tComp').checked && !simple) {
+        arrow(scene, C.x, C.y, down.x * F.par * k, down.y * F.par * k, '#7A5AC8', 'mC', true, vals ? `mg sinθ ${F.par.toFixed(1)}` : 'mg sinθ', C.x + down.x * F.par * k + 34, C.y + down.y * F.par * k + 18);
+        arrow(scene, C.x, C.y, -n.x * F.N * k, -n.y * F.N * k, '#7A5AC8', 'mC', true, vals ? `mg cosθ ${F.N.toFixed(1)}` : 'mg cosθ', C.x - n.x * F.N * k - 50, C.y - n.y * F.N * k + 12);
+      }
+      // normal (from contact point, outward)
+      arrow(scene, P.x, P.y, n.x * F.N * k, n.y * F.N * k, '#1FA3A3', 'mN', false, vals ? `N = ${F.N.toFixed(1)} N` : 'N', P.x + n.x * (F.N * k + 22), P.y + n.y * (F.N * k + 22));
+      // friction (along the surface, up the slope, drawn just below the block's contact face)
+      const fy = 10, Fo = { x: P.x - BW / 2 * down.x - n.x * fy, y: P.y - BW / 2 * down.y - n.y * fy };
+      if (!simple && !S.atBottom) {
+        // limiting-friction "ceiling"
+        const lx = Fo.x + d.x * F.lim * k, ly = Fo.y + d.y * F.lim * k;
+        el('line', { x1: Fo.x, y1: Fo.y, x2: lx, y2: ly, stroke: '#D9534F', 'stroke-width': 2, 'stroke-dasharray': '4 5', opacity: .55 }, scene);
+        el('line', { x1: lx - n.x * 10, y1: ly - n.y * 10, x2: lx + n.x * 10, y2: ly + n.y * 10, stroke: '#D9534F', 'stroke-width': 3 }, scene);
+      }
+      arrow(scene, Fo.x, Fo.y, d.x * F.f * k, d.y * F.f * k, '#D9534F', 'mF', false, vals ? `f = ${F.f.toFixed(1)} N` : 'f', Fo.x + d.x * (F.f * k) - n.x * 22, Fo.y + d.y * (F.f * k) - n.y * 22 + 5);
+    }
+    readouts(F);
+    drawGraph(F);
+  }
+
+  function readouts(F) {
+    $('angleV').textContent = `${S.theta.toFixed(1)}°`;
+    $('musV').textContent = S.mus.toFixed(2);
+    $('mukV').textContent = S.muk.toFixed(2);
+    $('massV').textContent = `${S.m} kg`; $('mass2V').textContent = `${S.m} kg`;
+    $('rW').textContent = `${F.W.toFixed(1)} N`;
+    $('rPar').textContent = `${F.par.toFixed(1)} N`;
+    $('rN').textContent = `${F.N.toFixed(1)} N`;
+    $('rF').textContent = S.atBottom ? '—' : `${F.f.toFixed(1)} N ${S.moving ? '(kinetic)' : '(static)'}`;
+    $('rLim').textContent = `${F.lim.toFixed(1)} N`;
+    $('rRep').textContent = `${F.repose.toFixed(1)}°`;
+    $('rA').textContent = S.moving ? `${Math.max(F.a, 0).toFixed(2)} m/s²` : '0 m/s²';
+    $('reposeTag').textContent = `tan θ = ${Math.tan(rad(S.theta)).toFixed(2)}   ·   μs = ${S.mus.toFixed(2)}`;
+    const st = $('status');
+    const map = { rest: ['st-rest', 'At rest: friction balances the pull'], edge: ['st-edge', 'Close to slipping: friction near its limit'],
+                  slide: ['st-slide', 'Sliding: kinetic friction acts'], bottom: ['st-bottom', 'Reached the bottom'] };
+    const st2 = S.moving ? 'slide' : F.state;
+    st.className = 'status ' + map[st2][0]; st.textContent = map[st2][1];
+  }
+
+  // ---------- graph ----------
+  const G = $('graph');
+  function drawGraph(F) {
+    if (document.body.classList.contains('simple')) return;
+    G.innerHTML = '';
+    const x0 = 60, y0 = 255, w = 550, h = 220, W = F.W, maxF = W * Math.max(S.mus * 0.75, Math.sin(rad(60)), 0.6) * 1.05;
+    const X = a => x0 + a / 60 * w, Y = f => y0 - f / maxF * h;
+    el('line', { x1: x0, y1: y0, x2: x0 + w, y2: y0, stroke: '#8A93A8' }, G);
+    el('line', { x1: x0, y1: y0, x2: x0, y2: y0 - h, stroke: '#8A93A8' }, G);
+    for (let a = 0; a <= 60; a += 10) {
+      el('line', { x1: X(a), y1: y0, x2: X(a), y2: y0 + 5, stroke: '#8A93A8' }, G);
+      el('text', { x: X(a), y: y0 + 20, 'text-anchor': 'middle', 'font-size': 12, fill: '#5E6A85' }, G).textContent = `${a}°`;
+    }
+    el('text', { x: x0 + w / 2, y: y0 + 40, 'text-anchor': 'middle', 'font-size': 13, fill: '#5E6A85' }, G).textContent = 'Angle of incline, θ';
+    const yl = el('text', { x: 18, y: y0 - h / 2, 'text-anchor': 'middle', 'font-size': 13, fill: '#5E6A85', transform: `rotate(-90 18 ${y0 - h / 2})` }, G); yl.textContent = 'Friction (N)';
+    const path = (fn, a, b) => { let p = ''; for (let t = a; t <= b + 1e-9; t += 0.5) p += (p ? 'L' : 'M') + X(t).toFixed(1) + ' ' + Y(fn(t)).toFixed(1); return p; };
+    const rep = F.repose;
+    // limiting friction curve (dashed)
+    el('path', { d: path(t => S.mus * W * Math.cos(rad(t)), 0, 60), fill: 'none', stroke: '#D9534F', 'stroke-width': 2, 'stroke-dasharray': '6 5', opacity: .6 }, G);
+    // static branch
+    el('path', { d: path(t => W * Math.sin(rad(t)), 0, Math.min(rep, 60)), fill: 'none', stroke: '#D9534F', 'stroke-width': 3.5 }, G);
+    // kinetic branch
+    if (rep < 60) {
+      el('path', { d: path(t => S.muk * W * Math.cos(rad(t)), rep, 60), fill: 'none', stroke: '#D9534F', 'stroke-width': 3.5 }, G);
+      el('line', { x1: X(rep), y1: Y(W * Math.sin(rad(rep))), x2: X(rep), y2: Y(S.muk * W * Math.cos(rad(rep))), stroke: '#D9534F', 'stroke-width': 2, 'stroke-dasharray': '3 4' }, G);
+      el('line', { x1: X(rep), y1: y0, x2: X(rep), y2: y0 - h, stroke: '#C86A12', 'stroke-width': 1.5, 'stroke-dasharray': '4 5' }, G);
+      el('text', { x: X(rep) + 6, y: y0 - h + 14, 'font-size': 12, fill: '#C86A12', 'font-weight': 700 }, G).textContent = `θr = ${rep.toFixed(1)}°`;
+      el('text', { x: X(Math.min(rep + 4, 52)), y: Y(S.muk * W * Math.cos(rad(Math.min(rep + 4, 52)))) + 18, 'font-size': 12, fill: '#D9534F' }, G).textContent = 'kinetic';
+    }
+    el('text', { x: X(Math.min(rep, 60) * 0.3) - 46, y: Y(W * Math.sin(rad(Math.min(rep, 60) * 0.3))) - 4, 'font-size': 12, fill: '#D9534F' }, G).textContent = 'static';
+    el('text', { x: X(4), y: Y(S.mus * W * Math.cos(rad(4))) - 8, 'font-size': 12, fill: '#D9534F', opacity: .8 }, G).textContent = 'limiting μsN';
+    // current point
+    const cf = S.atBottom ? null : F.f;
+    if (cf !== null) el('circle', { cx: X(S.theta), cy: Y(cf), r: 7, fill: '#F28C28', stroke: '#fff', 'stroke-width': 2 }, G);
+  }
+
+  let last = performance.now();
+
+  function resetBlock() { S.s = START; S.v = 0; S.moving = false; S.atBottom = false; }
+
+  // ---------- controls ----------
+  function applySurface(key) {
+    S.surface = key;
+    if (SURF[key]) { S.mus = SURF[key].mus; S.muk = SURF[key].muk; $('mus').value = S.mus; $('muk').value = S.muk; }
+  }
+  $('angle').addEventListener('input', e => { S.theta = +e.target.value; if (S.atBottom) resetBlock(); });
+  $('surface').addEventListener('change', e => { applySurface(e.target.value); resetBlock(); });
+  $('mus').addEventListener('input', e => { S.mus = +e.target.value; if (S.muk > S.mus) { S.muk = S.mus; $('muk').value = S.muk; } $('surface').value = 'custom'; S.surface = 'custom'; });
+  $('muk').addEventListener('input', e => { S.muk = Math.min(+e.target.value, S.mus); e.target.value = S.muk; $('surface').value = 'custom'; S.surface = 'custom'; });
+  $('mass').addEventListener('input', e => { S.m = +e.target.value; $('mass2').value = S.m; });
+  $('mass2').addEventListener('input', e => { S.m = +e.target.value; $('mass').value = S.m; });
+  $('surface2').addEventListener('change', e => { applySurface(e.target.value); });
+  $('resetBtn').addEventListener('click', resetBlock);
+  ['tForces', 'tComp', 'tVals'].forEach(id => $(id).addEventListener('change', draw));
+  $('tSimple').addEventListener('change', e => document.body.classList.toggle('simple', e.target.checked));
+
+  // ---------- Find mode ----------
+  let trial = 0;
+  $('raiseBtn').addEventListener('click', () => {
+    applySurface($('surface2').value);
+    S.theta = 0; $('angle').value = 0; resetBlock(); S.raising = true;
+  });
+  $('clearLog').addEventListener('click', () => { $('logBody').innerHTML = ''; trial = 0; });
+  function logTrial() {
+    trial++;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${trial}</td><td>${SURF[S.surface] ? SURF[S.surface].name : 'Custom'}</td><td>${S.m} kg</td><td><b>${S.theta.toFixed(1)}°</b></td><td class="adv">${deg(Math.atan(S.mus)).toFixed(1)}°</td>`;
+    $('logBody').appendChild(tr);
+    $('findHint').textContent = trial === 1 ? 'Now change the mass and raise again. Does the slipping angle change?' :
+      'Notice: the slipping angle depends only on the surfaces (μs), not on the mass, because tan θr = μs.';
+  }
+
+  // ---------- Predict mode ----------
+  function newQuestion() {
+    const keys = Object.keys(SURF), key = keys[Math.floor(Math.random() * keys.length)];
+    applySurface(key);
+    const rep = deg(Math.atan(S.mus));
+    let a; do { a = Math.round(5 + Math.random() * 50); } while (Math.abs(a - rep) < 2.5);
+    S.theta = a; $('angle').value = a; S.m = [1, 2, 3, 5, 8][Math.floor(Math.random() * 5)]; resetBlock();
+    S.predict = { key, a, answered: false, done: false, slides: Math.tan(rad(a)) > S.mus };
+    S.holdAtRest = true;
+    $('pq').textContent = `${SURF[key].name}, plane tilted at ${a}°. A ${S.m} kg block is placed on it. Will it stay or slide?`;
+    $('pinfo').textContent = `μs = ${S.mus.toFixed(2)}`;
+    $('pfb').className = 'fb'; $('pfb').textContent = ''; $('pNext').classList.add('hidden');
+    $('pStay').disabled = false; $('pSlide').disabled = false;
+  }
+  function answer(slide) {
+    if (!S.predict || S.predict.answered) return;
+    S.predict.answered = true; S.predict.guess = slide; S.predict.t0 = performance.now(); S.holdAtRest = false;
+    $('pStay').disabled = true; $('pSlide').disabled = true;
+  }
+  function finishPredict() {
+    const p = S.predict; if (!p || p.done) return; p.done = true;
+    const right = p.guess === p.slides; S.asked++; if (right) S.score++;
+    const t = Math.tan(rad(p.a)).toFixed(2), mu = S.mus.toFixed(2);
+    const why = p.slides ? `tan ${p.a}° = ${t} is more than μs = ${mu}, so the pull along the slope (mg sin θ) beats limiting friction (μs mg cos θ).`
+                         : `tan ${p.a}° = ${t} is less than μs = ${mu}, so static friction can balance the pull along the slope.`;
+    $('pfb').className = 'fb ' + (right ? 'ok' : 'no');
+    $('pfb').textContent = (right ? 'Correct! ' : 'Not this time. ') + (p.slides ? 'It slides. ' : 'It stays at rest. ') + why;
+    $('score').textContent = `Score ${S.score} / ${S.asked}`;
+    $('pNext').classList.remove('hidden');
+  }
+  $('pStay').addEventListener('click', () => answer(false));
+  $('pSlide').addEventListener('click', () => answer(true));
+  $('pNext').addEventListener('click', newQuestion);
+
+  // ---------- tabs ----------
+  document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === t));
+    S.mode = t.dataset.mode; S.raising = false; S.holdAtRest = false;
+    $('panelExplore').classList.toggle('hidden', S.mode !== 'explore');
+    $('panelFind').classList.toggle('hidden', S.mode !== 'find');
+    $('panelPredict').classList.toggle('hidden', S.mode !== 'predict');
+    if (S.mode === 'explore') { applySurface($('surface').value === 'custom' ? 'wood' : $('surface').value); $('surface').value = S.surface; S.theta = 15; $('angle').value = 15; resetBlock(); S.predict = null; }
+    if (S.mode === 'find') { applySurface($('surface2').value); S.theta = 0; $('angle').value = 0; resetBlock(); S.predict = null; }
+    if (S.mode === 'predict') newQuestion();
+  }));
+
+  // ---------- simulation loop (motion is frozen in Predict mode until the student answers) ----------
+  function guardedStep(now) {
+    if (S.holdAtRest) { last = now; draw(); requestAnimationFrame(guardedStep); return; }
+    origStepBody(now);
+  }
+  function origStepBody(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (S.raising && !S.moving && !S.atBottom) { S.theta = Math.min(60, S.theta + 3 * dt); $('angle').value = S.theta; if (S.theta >= 60) S.raising = false; }
+    const F = forces();
+    if (!S.atBottom) {
+      if (!S.moving && F.par > F.lim + 1e-9) { S.moving = true; if (S.raising) { S.raising = false; logTrial(); } }
+      if (S.moving) {
+        const th = rad(S.theta), acc = g * (Math.sin(th) - S.muk * Math.cos(th));
+        S.v += acc * dt;
+        if (S.v <= 0 && acc <= 0) { S.v = 0; S.moving = false; }
+        S.v = Math.max(S.v, 0);
+        S.s += S.v * dt * 60;
+        if (S.s >= L - BW - 40) { S.s = L - BW - 40; S.moving = false; S.v = 0; S.atBottom = true; }
+      }
+    }
+    if (S.predict && S.predict.answered && !S.predict.done && (S.atBottom || performance.now() - S.predict.t0 > 1800)) finishPredict();
+    draw();
+    requestAnimationFrame(guardedStep);
+  }
+
+  applySurface('wood');
+  requestAnimationFrame(guardedStep);
+})();
+</script>
+</body>
+</html>

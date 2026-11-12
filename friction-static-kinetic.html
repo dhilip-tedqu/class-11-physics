@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#142640">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<title>Static and Kinetic Friction</title>
+<style>
+  :root {
+    --navy: #142640; --navy2: #1F3559; --ink: #0F1B3D; --orange: #F28C28; --orange-dk: #C86A12;
+    --teal: #1FA3A3; --teal-dk: #157B7B; --red: #D9534F; --purple: #7A5AC8; --green: #2E9E5B;
+    --bg: #F3F5F9; --card: #FFFFFF; --line: #E1E5EE; --text: #142640; --muted: #5E6A85;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--text); font-family: "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.45; }
+  header { background: var(--navy); color: #fff; padding: 18px 16px 0; }
+  .wrap { max-width: 1200px; margin: 0 auto; }
+  .kicker { color: var(--orange); font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+  h1 { margin: 4px 0 2px; font-family: Cambria, Georgia, serif; font-size: clamp(24px, 4vw, 34px); }
+  .sub { color: #C9D0DF; margin: 0 0 14px; font-size: 15px; }
+  .tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+  .tab { background: transparent; border: 0; color: #C9D0DF; font: inherit; font-weight: 600; font-size: 15px; padding: 12px 16px;
+         border-radius: 10px 10px 0 0; cursor: pointer; }
+  .tab[aria-selected="true"] { background: var(--bg); color: var(--navy); }
+  .tab:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+  main { padding: 18px 16px 30px; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1.618fr) minmax(0, 1fr); gap: 18px; }
+  @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border-radius: 14px; padding: 16px; box-shadow: 0 1px 3px rgba(20, 38, 64, .08); }
+  .card h2 { margin: 0 0 10px; font-family: Cambria, Georgia, serif; font-size: 20px; }
+  .label { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--orange-dk); margin-bottom: 6px; }
+  svg { display: block; width: 100%; height: auto; }
+  .status { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; font-weight: 700; font-size: 15px; }
+  .st-rest { background: #DFF3EC; color: #1C6E45; }
+  .st-edge { background: #FDEBD6; color: #9A520C; }
+  .st-slide { background: #FBE1E0; color: #A73733; }
+  .st-bottom { background: #E6E9F2; color: var(--navy); }
+  .ctrl { margin: 14px 0; }
+  .ctrl-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .ctrl label { font-weight: 600; }
+  .val { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--navy); }
+  input[type=range] { width: 100%; height: 34px; accent-color: var(--orange); cursor: pointer; }
+  select { width: 100%; font: inherit; padding: 9px 10px; border-radius: 10px; border: 1px solid var(--line); background: #fff; color: var(--text); }
+  .toggles { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 6px; }
+  .toggles label { display: inline-flex; gap: 6px; align-items: center; font-size: 14px; cursor: pointer; }
+  .toggles input { width: 18px; height: 18px; accent-color: var(--teal); }
+  .btn { font: inherit; font-weight: 700; border: 0; border-radius: 12px; padding: 12px 18px; cursor: pointer; min-height: 46px; }
+  .btn-primary { background: var(--orange); color: #fff; }
+  .btn-teal { background: var(--teal); color: #fff; }
+  .btn-ghost { background: var(--bg); color: var(--navy); border: 1px solid var(--line); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btnrow { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+  table.read { width: 100%; border-collapse: collapse; font-size: 15px; }
+  table.read td { padding: 7px 0; border-bottom: 1px solid var(--line); }
+  table.read td:last-child { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 8px; vertical-align: -1px; }
+  .formula { font-family: Cambria, Georgia, serif; font-style: italic; color: var(--muted); font-size: 14px; }
+  .note { background: #FFF6EC; border-radius: 10px; padding: 10px 12px; font-size: 14px; color: #6B4210; margin-top: 12px; }
+  .below { display: grid; grid-template-columns: minmax(0, 1.618fr) minmax(0, 1fr); gap: 18px; margin-top: 18px; }
+  @media (max-width: 900px) { .below { grid-template-columns: 1fr; } }
+  details { border-bottom: 1px solid var(--line); padding: 8px 0; }
+  details summary { cursor: pointer; font-weight: 700; list-style: none; display: flex; justify-content: space-between; gap: 8px; }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::after { content: "+"; color: var(--orange-dk); font-weight: 700; }
+  details[open] summary::after { content: "–"; }
+  details p { margin: 6px 0 2px; font-size: 14px; }
+  .log { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 10px; }
+  .log th, .log td { padding: 6px 6px; border-bottom: 1px solid var(--line); text-align: left; }
+  .log th { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  .q { font-size: 18px; font-weight: 600; margin: 4px 0 8px; }
+  .fb { margin-top: 12px; padding: 12px; border-radius: 10px; font-size: 15px; display: none; }
+  .fb.ok { background: #DFF3EC; color: #1C6E45; display: block; }
+  .fb.no { background: #FBE1E0; color: #A73733; display: block; }
+  .score { font-weight: 700; color: var(--navy); }
+  .hidden { display: none !important; }
+  body.simple .adv { display: none !important; }
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 10px 16px 24px; }
+  .unitnav { background: #0F1B3D; }
+  .unitnav .wrap { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 16px; flex-wrap: wrap; }
+  .unitnav a { color: #fff; text-decoration: none; font-weight: 600; font-size: 14px; padding: 6px 10px; border-radius: 8px; }
+  .unitnav a:hover, .unitnav a:focus-visible { background: #1F3559; outline: none; }
+  .unitnav .pos { color: #A9B1C6; font-size: 13px; }
+  .unitnav .nx { display: flex; gap: 6px; }
+</style>
+</head>
+<body>
+<nav class="unitnav" aria-label="Unit navigation"><div class="wrap"><a href="index.html">← All lessons</a><span class="pos">Lesson 1 of 4</span><span class="nx"><a href="friction-inclined-plane.html">Next: Friction on an inclined plane →</a></span></div></nav>
+
+<header>
+  <div class="wrap">
+    <div class="kicker">Physics · Friction · Lesson 1</div>
+    <h1>Static and Kinetic Friction</h1>
+    <p class="sub">Pull a box across the floor with a spring balance. Find the force needed to start it moving, and the force needed to keep it moving.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="grid">
+    <section class="card" aria-label="Simulation">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <span id="status" class="status st-rest">At rest</span>
+        <span class="formula" id="speedTag"></span>
+      </div>
+      <svg id="sim" viewBox="0 30 720 330" role="img" aria-label="A box on the floor being pulled by a spring balance, with force arrows">
+        <defs>
+          <marker id="mW" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#142640"/></marker>
+          <marker id="mN" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1FA3A3"/></marker>
+          <marker id="mF" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#D9534F"/></marker>
+          <marker id="mP" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#F28C28"/></marker>
+        </defs>
+        <g id="scene"></g>
+      </svg>
+      <div class="toggles">
+        <label><input type="checkbox" id="tForces" checked> Show forces</label>
+        <label><input type="checkbox" id="tVals" checked> Show values</label>
+        <label><input type="checkbox" id="tWheels"> Put wheels under the box</label>
+      </div>
+    </section>
+
+    <section class="card" aria-label="Controls">
+      <div class="label">Controls</div>
+      <div class="ctrl">
+        <div class="ctrl-row"><label for="pull">Pulling force (P)</label><span class="val" id="pullV"></span></div>
+        <input type="range" id="pull" min="0" max="40" step="0.1" value="0">
+      </div>
+      <div class="ctrl">
+        <label for="surface">Surfaces in contact</label>
+        <select id="surface">
+          <option value="ice">Box on ice</option>
+          <option value="tile">Box on a tiled floor</option>
+          <option value="wood" selected>Wooden box on a wooden floor</option>
+          <option value="carpet">Box on a carpet</option>
+        </select>
+      </div>
+      <div class="ctrl">
+        <div class="ctrl-row"><label for="mass">Mass of box (m)</label><span class="val" id="massV"></span></div>
+        <input type="range" id="mass" min="2" max="15" step="0.5" value="5">
+      </div>
+      <div class="btnrow">
+        <button class="btn btn-primary" id="rampBtn">▲ Increase the pull slowly</button>
+        <button class="btn btn-ghost" id="stopBtn">■ Let go</button>
+      </div>
+
+      <div class="label" style="margin-top:18px">Live values</div>
+      <table class="read" aria-live="polite">
+        <tr><td><span class="sw" style="background:#F28C28"></span>Pulling force, P</td><td id="rP"></td></tr>
+        <tr><td><span class="sw" style="background:#1FA3A3"></span>Normal force, N = mg</td><td id="rN"></td></tr>
+        <tr><td><span class="sw" style="background:#D9534F"></span>Friction acting now, f</td><td id="rF"></td></tr>
+        <tr><td><span class="sw" style="background:#fff;border:2px dashed #D9534F"></span>Limiting friction, μ<sub>s</sub>N</td><td id="rLim"></td></tr>
+        <tr><td>Kinetic friction, μ<sub>k</sub>N</td><td id="rKin"></td></tr>
+        <tr><td>Acceleration, a = (P − f) / m</td><td id="rA"></td></tr>
+      </table>
+    </section>
+  </div>
+
+  <div class="below">
+    <section class="card" aria-label="Graph">
+      <h2>Friction against pulling force</h2>
+      <svg id="graph" viewBox="0 0 640 300" role="img" aria-label="Graph of friction force against pulling force"></svg>
+      <p class="formula" style="margin:6px 0 0">While the box is at rest, friction equals the pull. At limiting friction the box starts to move, and friction drops to the smaller kinetic value. Your own readings appear as dots.</p>
+    </section>
+    <section class="card" aria-label="Try this">
+      <h2>Try this</h2>
+      <ol style="margin:0;padding-left:20px;display:grid;gap:10px">
+        <li>Press <b>Increase the pull slowly</b>. At what force does the box start to move? Compare it with μ<sub>s</sub>N.</li>
+        <li>Once it moves, reduce the pull to just above μ<sub>k</sub>N. Why does the box keep moving with a smaller force?</li>
+        <li>Double the mass. What happens to the force needed to start it?</li>
+        <li>Put wheels under the box. How much smaller is the force now? This is <b>rolling friction</b>.</li>
+      </ol>
+      <h2 style="margin-top:18px">Key terms</h2>
+      <details><summary><span>Static friction</span></summary><p>Friction on an object at rest. It matches the applied force, up to a limit.</p></details>
+      <details><summary><span>Limiting friction</span></summary><p>The largest static friction, <i>f<sub>max</sub> = μ<sub>s</sub>N</i>. A bigger pull starts the motion.</p></details>
+      <details><summary><span>Kinetic (sliding) friction</span></summary><p>Friction on a sliding object, <i>f<sub>k</sub> = μ<sub>k</sub>N</i>. It is less than limiting friction.</p></details>
+      <details><summary><span>Rolling friction</span></summary><p>Friction when an object rolls instead of slides. It is much smaller, which is why wheels and ball bearings make work easier.</p></details>
+      <details><summary><span>Normal force</span></summary><p>The upward push of the floor on the box. On level ground, <i>N = mg</i>.</p></details>
+    </section>
+  </div>
+  <div class="note" style="margin-top:18px">A simplified model for learning: the pull is horizontal, coefficients are typical values and g = 9.8 m/s². The floor scrolls so the box stays in view.</div>
+</main>
+<footer>Built with AI · Hosted on GitHub · Works offline once opened</footer>
+
+<script>
+(() => {
+  const g = 9.8, $ = id => document.getElementById(id);
+  const SURF = { ice: [0.10, 0.03], tile: [0.40, 0.30], wood: [0.50, 0.30], carpet: [0.80, 0.60] };
+  const MU_ROLL = 0.02;
+  const S = { P: 0, m: 5, surf: 'wood', mus: 0.5, muk: 0.3, v: 0, x: 0, moving: false, ramp: false, pts: [] };
+  const NS = 'http://www.w3.org/2000/svg';
+  const el = (t, a, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
+  const wheels = () => $('tWheels').checked;
+  const coeffs = () => wheels() ? { s: MU_ROLL, k: MU_ROLL } : { s: S.mus, k: S.muk };
+
+  function forces() {
+    const N = S.m * g, c = coeffs(), lim = c.s * N, kin = c.k * N;
+    let f, a = 0;
+    if (S.moving) { f = kin; a = (S.P - kin) / S.m; } else { f = Math.min(S.P, lim); }
+    return { N, lim, kin, f, a };
+  }
+
+  function arrow(p, x1, y1, dx, dy, col, mk, label, lx, ly) {
+    if (Math.hypot(dx, dy) < 3) return;
+    el('line', { x1, y1, x2: x1 + dx, y2: y1 + dy, stroke: col, 'stroke-width': 4.5, 'marker-end': `url(#${mk})`, 'stroke-linecap': 'round' }, p);
+    if (label) el('text', { x: lx, y: ly, fill: col, 'font-size': 15, 'font-weight': 700, 'text-anchor': 'middle', 'paint-order': 'stroke', stroke: '#fff', 'stroke-width': 4 }, p).textContent = label;
+  }
+
+  function draw() {
+    const F = forces(), sc = $('scene'); sc.innerHTML = '';
+    const GY = 290, BX = 250, BW = 150, BH = 110, vals = $('tVals').checked;
+    // floor that scrolls with distance travelled
+    const floorCol = { ice: '#CFE8F5', tile: '#E4E7EE', wood: '#D9B48A', carpet: '#B24C4C' }[S.surf];
+    el('rect', { x: 0, y: GY, width: 720, height: 70, fill: floorCol }, sc);
+    const off = (S.x * 60) % 80;
+    for (let i = -1; i < 11; i++) el('line', { x1: i * 80 - off, y1: GY, x2: i * 80 - off, y2: GY + 70, stroke: '#00000022', 'stroke-width': 2 }, sc);
+    el('line', { x1: 0, y1: GY, x2: 720, y2: GY, stroke: '#5E6A85', 'stroke-width': 2 }, sc);
+    // box (with optional wheels)
+    const by = wheels() ? GY - BH - 22 : GY - BH;
+    el('rect', { x: BX, y: by, width: BW, height: BH, rx: 6, fill: '#C98A4E', stroke: '#8A5A2E', 'stroke-width': 3 }, sc);
+    el('line', { x1: BX, y1: by, x2: BX + BW, y2: by + BH, stroke: '#8A5A2E', 'stroke-width': 2, opacity: .5 }, sc);
+    el('line', { x1: BX + BW, y1: by, x2: BX, y2: by + BH, stroke: '#8A5A2E', 'stroke-width': 2, opacity: .5 }, sc);
+    el('text', { x: BX + BW / 2, y: by + BH / 2 + 7, 'text-anchor': 'middle', fill: '#fff', 'font-size': 20, 'font-weight': 700, 'paint-order': 'stroke', stroke: '#8A5A2E', 'stroke-width': 3 }, sc).textContent = `${S.m} kg`;
+    if (wheels()) [BX + 28, BX + BW - 28].forEach(cx => {
+      el('circle', { cx, cy: GY - 11, r: 11, fill: '#142640' }, sc);
+      const a = S.x * 60 / 11;
+      el('line', { x1: cx, y1: GY - 11, x2: cx + 9 * Math.cos(a), y2: GY - 11 + 9 * Math.sin(a), stroke: '#fff', 'stroke-width': 2 }, sc);
+    });
+    // rope + spring balance + hand
+    const ry = by + BH / 2, sbx = BX + BW + 60;
+    el('line', { x1: BX + BW, y1: ry, x2: sbx, y2: ry, stroke: '#5E6A85', 'stroke-width': 3 }, sc);
+    const stretch = Math.min(70, S.P * 0.9);
+    el('rect', { x: sbx, y: ry - 16, width: 70 + stretch, height: 32, rx: 6, fill: '#E7ECF5', stroke: '#5E6A85', 'stroke-width': 2 }, sc);
+    let zz = `M${sbx + 6} ${ry}`; const n = 10, w = (58 + stretch) / n;
+    for (let i = 1; i <= n; i++) zz += ` L${sbx + 6 + i * w} ${ry + (i % 2 ? -9 : 9)}`;
+    el('path', { d: zz, fill: 'none', stroke: '#F28C28', 'stroke-width': 2.5 }, sc);
+    el('text', { x: sbx + (70 + stretch) / 2, y: ry - 24, 'text-anchor': 'middle', fill: '#142640', 'font-size': 15, 'font-weight': 700 }, sc).textContent = `${S.P.toFixed(1)} N`;
+    const hx = sbx + 70 + stretch;
+    el('line', { x1: hx, y1: ry, x2: hx + 30, y2: ry, stroke: '#5E6A85', 'stroke-width': 3 }, sc);
+    el('circle', { cx: hx + 44, cy: ry, r: 16, fill: '#C68B5E' }, sc);
+
+    if ($('tForces').checked) {
+      const k = 120 / (S.m * g), cx = BX + BW / 2, cy = by + BH / 2;
+      arrow(sc, cx, cy, 0, 100, '#142640', 'mW', vals ? `W = ${(S.m * g).toFixed(1)} N` : 'W', cx + 72, cy + 98);
+      arrow(sc, cx, by, 0, -100, '#1FA3A3', 'mN', vals ? `N = ${F.N.toFixed(1)} N` : 'N', cx + 72, by - 70);
+      arrow(sc, BX + BW, ry + 26, S.P * k, 0, '#F28C28', 'mP', vals ? `P = ${S.P.toFixed(1)} N` : 'P', BX + BW + 50, ry + 50);
+      // friction along the floor, under the box, pointing left
+      const fy0 = GY - 10, fl = Math.min(F.lim * k, 230);
+      el('line', { x1: BX, y1: fy0, x2: BX - fl, y2: fy0, stroke: '#D9534F', 'stroke-width': 2, 'stroke-dasharray': '4 5', opacity: .6 }, sc);
+      el('line', { x1: BX - fl, y1: fy0 - 10, x2: BX - fl, y2: fy0 + 10, stroke: '#D9534F', 'stroke-width': 3 }, sc);
+      arrow(sc, BX, fy0, -Math.min(F.f * k, 230), 0, '#D9534F', 'mF', vals ? `f = ${F.f.toFixed(1)} N` : 'f', BX - 70, fy0 - 18);
+    }
+    readouts(F); graph(F);
+  }
+
+  function readouts(F) {
+    $('pullV').textContent = `${S.P.toFixed(1)} N`; $('massV').textContent = `${S.m} kg`;
+    $('rP').textContent = `${S.P.toFixed(1)} N`; $('rN').textContent = `${F.N.toFixed(1)} N`;
+    $('rF').textContent = `${F.f.toFixed(1)} N ${S.moving ? (wheels() ? '(rolling)' : '(kinetic)') : '(static)'}`;
+    $('rLim').textContent = `${F.lim.toFixed(1)} N`; $('rKin').textContent = `${F.kin.toFixed(1)} N`;
+    $('rA').textContent = S.moving ? `${F.a.toFixed(2)} m/s²` : '0 m/s²';
+    $('speedTag').textContent = `speed ${S.v.toFixed(2)} m/s`;
+    const st = $('status');
+    if (S.moving) { st.className = 'status st-slide'; st.textContent = wheels() ? 'Rolling: rolling friction acts' : 'Sliding: kinetic friction acts'; }
+    else if (S.P > 0.9 * F.lim && S.P > 0) { st.className = 'status st-edge'; st.textContent = 'About to move: friction near its limit'; }
+    else { st.className = 'status st-rest'; st.textContent = 'At rest: friction balances the pull'; }
+  }
+
+  const G = $('graph');
+  function graph(F) {
+    G.innerHTML = '';
+    const x0 = 60, y0 = 255, w = 550, h = 215, maxP = +$('pull').max, maxF = Math.max(F.lim * 1.25, 10);
+    const X = p => x0 + p / maxP * w, Y = f => y0 - Math.min(f, maxF) / maxF * h;
+    el('line', { x1: x0, y1: y0, x2: x0 + w, y2: y0, stroke: '#8A93A8' }, G);
+    el('line', { x1: x0, y1: y0, x2: x0, y2: y0 - h, stroke: '#8A93A8' }, G);
+    for (let p = 0; p <= maxP; p += 10) {
+      el('text', { x: X(p), y: y0 + 18, 'text-anchor': 'middle', 'font-size': 12, fill: '#5E6A85' }, G).textContent = p;
+    }
+    el('text', { x: x0 + w / 2, y: y0 + 38, 'text-anchor': 'middle', 'font-size': 13, fill: '#5E6A85' }, G).textContent = 'Pulling force, P (N)';
+    el('text', { x: 18, y: y0 - h / 2, 'text-anchor': 'middle', 'font-size': 13, fill: '#5E6A85', transform: `rotate(-90 18 ${y0 - h / 2})` }, G).textContent = 'Friction (N)';
+    const lp = Math.min(F.lim, maxP);
+    el('path', { d: `M${X(0)} ${Y(0)} L${X(lp)} ${Y(lp)}`, stroke: '#D9534F', 'stroke-width': 3, fill: 'none', opacity: .35 }, G);
+    if (F.lim < maxP) {
+      el('path', { d: `M${X(F.lim)} ${Y(F.lim)} L${X(F.lim)} ${Y(F.kin)} L${X(maxP)} ${Y(F.kin)}`, stroke: '#D9534F', 'stroke-width': 3, fill: 'none', opacity: .35, 'stroke-dasharray': '5 4' }, G);
+      el('text', { x: X(F.lim) + 6, y: Y(F.lim) - 6, 'font-size': 12, fill: '#D9534F', 'font-weight': 700 }, G).textContent = `limiting ${F.lim.toFixed(1)} N`;
+      el('text', { x: X(Math.min(F.lim + 8, maxP - 12)), y: Y(F.kin) - 8, 'font-size': 12, fill: '#D9534F' }, G).textContent = `kinetic ${F.kin.toFixed(1)} N`;
+    }
+    S.pts.forEach(p => el('circle', { cx: X(p[0]), cy: Y(p[1]), r: 3, fill: p[2] ? '#D9534F' : '#1FA3A3', opacity: .8 }, G));
+    el('circle', { cx: X(S.P), cy: Y(F.f), r: 7, fill: '#F28C28', stroke: '#fff', 'stroke-width': 2 }, G);
+  }
+
+  let last = performance.now(), sampleT = 0;
+  function step(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (S.ramp) { S.P = Math.min(+$('pull').max, S.P + Math.max(0.5, coeffs().s * S.m * g / 6) * dt); $('pull').value = S.P; if (S.moving) S.ramp = false; }
+    let F = forces();
+    if (!S.moving && S.P > F.lim + 1e-9) S.moving = true;
+    if (S.moving) {
+      const kin = coeffs().k * S.m * g, a = (S.P - kin) / S.m;
+      S.v += a * dt;
+      if (S.v <= 0 && a <= 0) { S.v = 0; S.moving = false; }
+      S.v = Math.max(0, S.v); S.x += S.v * dt;
+    }
+    F = forces();
+    sampleT += dt;
+    if (sampleT > 0.15 && (S.P > 0)) { sampleT = 0; S.pts.push([S.P, F.f, S.moving]); if (S.pts.length > 300) S.pts.shift(); }
+    draw(); requestAnimationFrame(step);
+  }
+
+  function setSurface(k) { S.surf = k; [S.mus, S.muk] = SURF[k]; }
+  function updMax() { const lim = (wheels() ? MU_ROLL : S.mus) * S.m * g; $('pull').max = Math.max(10, Math.ceil(lim * 1.5 / 10) * 10); }
+  function resetAll() { S.P = 0; $('pull').value = 0; S.v = 0; S.moving = false; S.ramp = false; S.pts = []; updMax(); }
+  $('pull').addEventListener('input', e => { S.P = +e.target.value; S.ramp = false; });
+  $('surface').addEventListener('change', e => { setSurface(e.target.value); resetAll(); });
+  $('mass').addEventListener('input', e => { S.m = +e.target.value; resetAll(); });
+  $('tWheels').addEventListener('change', resetAll);
+  $('rampBtn').addEventListener('click', () => { resetAll(); S.ramp = true; });
+  $('stopBtn').addEventListener('click', () => { S.P = 0; $('pull').value = 0; S.ramp = false; });
+  ['tForces', 'tVals'].forEach(id => $(id).addEventListener('change', draw));
+  setSurface('wood'); updMax(); requestAnimationFrame(step);
+})();
+</script>
+</body>
+</html>
