@@ -1,165 +1,126 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#172554">
-  <title>Class 11 Physics — Lessons</title>
-  <style>
-    :root {
-      --ink: #172554;
-      --muted: #64748b;
-      --bg: #f4f7fb;
-      --card: #ffffff;
-      --line: #e2e8f0;
-      --blue: #2563eb;
-      --teal: #0f9f9a;
-      --orange: #f59e0b;
-      --purple: #805ad5;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--ink);
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      line-height: 1.5;
-    }
-    .hero {
-      padding: 34px 20px 38px;
-      color: #fff;
-      background: linear-gradient(135deg, #172554, #1d4ed8 68%, #0f9f9a);
-    }
-    .wrap { width: min(900px, 100% - 32px); margin: 0 auto; }
-    .eyebrow {
-      margin: 0 0 8px;
-      color: #bfdbfe;
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-    h1 {
-      margin: 0;
-      font-family: Cambria, Georgia, serif;
-      font-size: clamp(30px, 7vw, 44px);
-      line-height: 1.12;
-    }
-    .intro { margin: 12px 0 0; max-width: 560px; color: #e0e7ff; }
-    main { padding: 28px 0 42px; }
-    .unit { margin: 0 0 30px; }
-    .unit-heading {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 0 0 14px;
-      font-size: 21px;
-      font-family: Cambria, Georgia, serif;
-    }
-    .unit-heading::before {
-      content: "";
-      width: 7px;
-      height: 25px;
-      border-radius: 8px;
-      background: var(--teal);
-    }
-    .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-    .lesson {
-      display: flex;
-      flex-direction: column;
-      min-height: 170px;
-      padding: 19px;
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      box-shadow: 0 5px 18px rgba(23, 37, 84, .05);
-      text-decoration: none;
-      color: inherit;
-      transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
-    }
-    .lesson:hover, .lesson:focus-visible {
-      transform: translateY(-3px);
-      border-color: #93c5fd;
-      box-shadow: 0 10px 24px rgba(23, 37, 84, .11);
-      outline: none;
-    }
-    .tag {
-      align-self: flex-start;
-      margin-bottom: 12px;
-      padding: 4px 9px;
-      border-radius: 999px;
-      background: #e0f2fe;
-      color: #075985;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .6px;
-      text-transform: uppercase;
-    }
-    .lesson h3 { margin: 0 0 7px; font-size: 18px; }
-    .lesson p { margin: 0; color: var(--muted); font-size: 14px; }
-    .open {
-      margin-top: auto;
-      padding-top: 17px;
-      color: var(--blue);
-      font-size: 14px;
-      font-weight: 800;
-    }
-    .empty {
-      padding: 17px 19px;
-      border: 1px dashed #cbd5e1;
-      border-radius: 14px;
-      color: var(--muted);
-      background: #f8fafc;
-      font-size: 14px;
-    }
-    footer { padding: 0 16px 26px; color: var(--muted); text-align: center; font-size: 12px; }
-    @media (max-width: 620px) {
-      .hero { padding: 28px 0 32px; }
-      .cards { grid-template-columns: 1fr; gap: 11px; }
-      .lesson { min-height: 150px; padding: 17px; }
-      main { padding-top: 23px; }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Friction: Interactive Lessons</title>
+<meta name="description" content="Four interactive simulation lessons on friction for school physics.">
+<meta name="theme-color" content="#142640">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root { --navy: #142640; --orange: #F28C28; --orange-dk: #C86A12; --teal: #1FA3A3; --bg: #F3F5F9; --muted: #5E6A85; --line: #E1E5EE; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--navy); font-family: "Segoe UI", Roboto, Arial, sans-serif; line-height: 1.45; }
+  header { background: var(--navy); color: #fff; padding: 36px 16px 44px; }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+  .kicker { color: var(--orange); font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+  h1 { font-family: Cambria, Georgia, serif; font-size: clamp(30px, 6vw, 48px); margin: 6px 0 8px; }
+  .lead { color: #C9D0DF; font-size: 17px; max-width: 640px; margin: 0; }
+  .install { margin-top: 20px; display: none; background: var(--orange); color: #fff; border: 0; font: inherit; font-weight: 700; padding: 12px 18px; border-radius: 12px; cursor: pointer; min-height: 46px; }
+  main { padding: 0 16px 40px; margin-top: -24px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+  a.card { display: flex; flex-direction: column; background: #fff; border-radius: 16px; padding: 20px; text-decoration: none; color: inherit;
+           box-shadow: 0 1px 3px rgba(20,38,64,.08); transition: transform .15s, box-shadow .15s; border: 2px solid transparent; }
+  a.card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(20,38,64,.12); }
+  a.card:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+  .num { font-family: Cambria, Georgia, serif; font-size: 34px; font-weight: 700; color: var(--orange); line-height: 1; }
+  .card h2 { font-family: Cambria, Georgia, serif; font-size: 21px; margin: 12px 0 6px; }
+  .card p { margin: 0 0 14px; color: var(--muted); font-size: 15px; flex: 1; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { background: var(--bg); border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 600; color: var(--navy); }
+  .open { margin-top: 14px; font-weight: 700; color: var(--orange-dk); }
+  svg.thumb { width: 100%; height: 110px; border-radius: 10px; background: #EEF3FA; margin-top: 12px; }
+  .how { background: #fff; border-radius: 16px; padding: 20px; margin-top: 22px; }
+  .how h2 { font-family: Cambria, Georgia, serif; margin: 0 0 8px; font-size: 20px; }
+  .how ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+  footer { text-align: center; color: var(--muted); font-size: 13px; padding: 10px 16px 28px; }
+
+  .unit-section { margin-top: 28px; }
+  .unit-title { margin: 0 0 14px; font-family: Cambria, Georgia, serif; font-size: 25px; color: var(--navy); }
+</style>
 </head>
 <body>
-  <header class="hero">
-    <div class="wrap">
-      <p class="eyebrow">Learning resources · Class 11</p>
-      <h1>Physics Lessons</h1>
-      <p class="intro">Explore each topic through interactive lessons, simulations and practice activities.</p>
+<header>
+  <div class="wrap">
+    <div class="kicker">Physics · Interactive unit</div>
+    <h1>Friction</h1>
+    <p class="lead">Four simulation lessons. Move the sliders, watch the forces, and discover the rules of friction for yourself. Works on any phone or computer, even offline.</p>
+    <button class="install" id="installBtn">📲 Install this app on your phone</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="cards">
+    <a class="card" href="friction-static-kinetic.html">
+      <div class="num">01</div>
+      <svg class="thumb" viewBox="0 0 260 110" aria-hidden="true"><rect x="0" y="80" width="260" height="30" fill="#D9B48A"/><rect x="70" y="36" width="60" height="44" rx="4" fill="#C98A4E"/><line x1="130" y1="58" x2="190" y2="58" stroke="#5E6A85" stroke-width="3"/><rect x="160" y="50" width="40" height="16" rx="4" fill="#E7ECF5" stroke="#5E6A85"/><path d="M68 72 L36 72" stroke="#D9534F" stroke-width="5"/><path d="M36 66 L26 72 L36 78Z" fill="#D9534F"/></svg>
+      <h2>Static and kinetic friction</h2>
+      <p>Pull a box with a spring balance. Why is starting harder than keeping it moving? Add wheels to meet rolling friction.</p>
+      <div class="tags"><span class="tag">Limiting friction</span><span class="tag">Rolling friction</span></div>
+      <div class="open">Open lesson →</div>
+    </a>
+    <a class="card" href="friction-inclined-plane.html">
+      <div class="num">02</div>
+      <svg class="thumb" viewBox="0 0 260 110" aria-hidden="true"><polygon points="40,100 220,100 40,30" fill="#E7DCCB" stroke="#8A6A4A"/><g transform="translate(100 54) rotate(21)"><rect x="-20" y="-28" width="40" height="28" rx="4" fill="#F28C28"/></g><path d="M200 100 A20 20 0 0 0 196 92" stroke="#C86A12" stroke-width="2" fill="none"/></svg>
+      <h2>Friction on an inclined plane</h2>
+      <p>Tilt the plane until the block slips. Find the angle of repose, and why it does not depend on mass.</p>
+      <div class="tags"><span class="tag">Angle of repose</span><span class="tag">Normal force</span></div>
+      <div class="open">Open lesson →</div>
+    </a>
+    <a class="card" href="friction-braking-distance.html">
+      <div class="num">03</div>
+      <svg class="thumb" viewBox="0 0 260 110" aria-hidden="true"><rect x="0" y="50" width="260" height="50" fill="#4A4F5C"/><rect x="20" y="88" width="80" height="6" fill="#F28C28"/><rect x="100" y="88" width="70" height="6" fill="#D9534F"/><rect x="140" y="58" width="40" height="18" rx="5" fill="#F28C28"/><g fill="#fff"><rect x="210" y="54" width="12" height="5"/><rect x="210" y="64" width="12" height="5"/><rect x="210" y="74" width="12" height="5"/></g><circle cx="216" cy="36" r="6" fill="#C68B5E"/></svg>
+      <h2>Friction and braking distance</h2>
+      <p>Can the car stop before the zebra crossing? See how speed, wet roads and slow reactions change everything.</p>
+      <div class="tags"><span class="tag">Road safety</span><span class="tag">v² law</span></div>
+      <div class="open">Open lesson →</div>
+    </a>
+    <a class="card" href="friction-banked-roads.html">
+      <div class="num">04</div>
+      <svg class="thumb" viewBox="0 0 260 110" aria-hidden="true"><circle cx="130" cy="55" r="44" fill="none" stroke="#4A4F5C" stroke-width="16"/><rect x="164" y="60" width="12" height="22" rx="3" fill="#F28C28" transform="rotate(-30 170 71)"/><circle cx="130" cy="55" r="3" fill="#142640"/></svg>
+      <h2>Friction on curves and banked roads</h2>
+      <p>Why do highway bends tilt? Take a curve too fast and watch the car skid outward.</p>
+      <div class="tags"><span class="tag">Circular motion</span><span class="tag">Banking</span></div>
+      <div class="open">Open lesson →</div>
+    </a>
+  </div>
+
+
+  <section class="unit-section" aria-labelledby="elastic-heading">
+    <h2 class="unit-title" id="elastic-heading">Elastic Collision</h2>
+    <div class="cards">
+      <a class="card" href="elastic-collision-simulation.html">
+        <div class="num">01</div>
+        <h2>Impact of Elastic Bodies</h2>
+        <p>Change the masses and initial velocities of two balls, then observe how their velocities change in a perfectly elastic collision.</p>
+        <div class="tags"><span class="tag">Conservation of momentum</span><span class="tag">Kinetic energy</span></div>
+        <div class="open">Open lesson →</div>
+      </a>
     </div>
-  </header>
+  </section>
 
-  <main class="wrap">
-    <section class="unit" aria-labelledby="friction-heading">
-      <h2 class="unit-heading" id="friction-heading">Friction</h2>
-      <div class="cards">
-        <a class="lesson" href="friction-static-kinetic.html">
-          <span class="tag">Lesson 1</span>
-          <h3>Static and Kinetic Friction</h3>
-          <p>Explore how friction changes as a box is pulled from rest into motion.</p>
-          <span class="open">Open lesson →</span>
-        </a>
-        <a class="lesson" href="friction-inclined-plane.html">
-          <span class="tag">Lesson 2</span>
-          <h3>Friction on an Inclined Plane</h3>
-          <p>Change the slope and surface to investigate forces and the angle of repose.</p>
-          <span class="open">Open lesson →</span>
-        </a>
-        <a class="lesson" href="friction-braking-distance.html">
-          <span class="tag">Lesson 3</span>
-          <h3>Friction and Braking Distance</h3>
-          <p>See how speed, road conditions and reaction time affect stopping distance.</p>
-          <span class="open">Open lesson →</span>
-        </a>
-      </div>
-    </section>
+  <section class="how">
+    <h2>For teachers: how this unit was made</h2>
+    <ol>
+      <li>Each lesson was described to an AI assistant in plain English and came back as one HTML file.</li>
+      <li>The four files and this home page sit together in one folder.</li>
+      <li>The folder was uploaded to GitHub and published with GitHub Pages, so the whole unit has one link.</li>
+      <li>To add a lesson, upload one more HTML file and add one card to this page.</li>
+    </ol>
+  </section>
+</main>
+<footer>Built with AI · Hosted on GitHub · Simplified models for learning</footer>
 
-    <section class="unit" aria-labelledby="motion-heading">
-      <h2 class="unit-heading" id="motion-heading">Laws of Motion</h2>
-      <div class="empty">Newton’s Second Law lesson file was not included in the uploaded files. Add <strong>newton-second-law.html</strong> to this folder and its lesson card can be linked here.</div>
-    </section>
-  </main>
-  <footer>Class 11 Physics · Interactive lesson collection</footer>
+<script>
+  // Offline support and "install as app" (works when served over https, e.g. GitHub Pages)
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+  let deferred;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; document.getElementById('installBtn').style.display = 'inline-block'; });
+  document.getElementById('installBtn').addEventListener('click', async () => { if (!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; document.getElementById('installBtn').style.display = 'none'; });
+</script>
 </body>
 </html>

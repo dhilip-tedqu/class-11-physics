@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elastic Collision Simulation</title>
+<style>
+  :root { color-scheme: light; --ink:#172033; --muted:#64748b; --line:#dce3ed; --blue:#2563eb; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:28px 16px; font-family:Arial, sans-serif; background:#f3f6fb; color:var(--ink); }
+  main { max-width:900px; margin:auto; }
+  h1 { margin:0 0 8px; font-size:clamp(25px,4vw,34px); }
+  .intro { color:var(--muted); margin:0 0 22px; line-height:1.5; }
+  .card { background:white; border:1px solid var(--line); border-radius:16px; padding:20px; margin-bottom:16px; box-shadow:0 5px 18px #1720330a; }
+  .stage { background:#f8fafc; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  canvas { display:block; width:100%; height:250px; }
+  .controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px 24px; }
+  .control label { display:flex; justify-content:space-between; gap:12px; font-weight:600; margin-bottom:9px; }
+  output { color:var(--blue); font-variant-numeric:tabular-nums; }
+  input[type=range] { width:100%; accent-color:var(--blue); }
+  .buttons { display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; }
+  button { border:0; border-radius:9px; padding:11px 18px; font-weight:700; cursor:pointer; background:var(--blue); color:white; }
+  button.secondary { background:#e8eef8; color:#24324a; }
+  button:focus-visible, input:focus-visible { outline:3px solid #93c5fd; outline-offset:3px; }
+  .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .stat { background:#f8fafc; border:1px solid var(--line); border-radius:10px; padding:13px; }
+  .stat span { display:block; color:var(--muted); font-size:12px; margin-bottom:7px; }
+  .stat strong { font-size:19px; font-variant-numeric:tabular-nums; }
+  .note { color:var(--muted); font-size:13px; line-height:1.5; margin:14px 0 0; }
+  @media(max-width:600px) { .controls { grid-template-columns:1fr; } .stats { grid-template-columns:1fr; } canvas { height:210px; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Elastic Collision Simulation</h1>
+  <p class="intro">Explore a one-dimensional collision between two balls. Change their masses and starting velocities, then run the simulation.</p>
+
+  <section class="card">
+    <div class="stage"><canvas id="scene" aria-label="Two balls moving and colliding on a horizontal track"></canvas></div>
+    <div class="buttons">
+      <button id="play">▶ Play</button>
+      <button class="secondary" id="step">Step</button>
+      <button class="secondary" id="reset">↺ Reset</button>
+    </div>
+    <p class="note">Positive velocity means motion to the right; negative velocity means motion to the left. The collision is modelled as perfectly elastic.</p>
+  </section>
+
+  <section class="card">
+    <h2 style="margin:0 0 18px;font-size:19px">Set the conditions</h2>
+    <div class="controls">
+      <div class="control">
+        <label for="m1">Mass of ball A <output id="m1v">2 kg</output></label>
+        <input id="m1" type="range" min="1" max="10" step="1" value="2">
+      </div>
+      <div class="control">
+        <label for="m2">Mass of ball B <output id="m2v">2 kg</output></label>
+        <input id="m2" type="range" min="1" max="10" step="1" value="2">
+      </div>
+      <div class="control">
+        <label for="u1">Initial velocity of A <output id="u1v">4 m/s</output></label>
+        <input id="u1" type="range" min="-8" max="8" step="1" value="4">
+      </div>
+      <div class="control">
+        <label for="u2">Initial velocity of B <output id="u2v">0 m/s</output></label>
+        <input id="u2" type="range" min="-8" max="8" step="1" value="0">
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 style="margin:0 0 14px;font-size:19px">Collision results</h2>
+    <div class="stats">
+      <div class="stat"><span>Velocity of A after collision</span><strong id="v1">—</strong></div>
+      <div class="stat"><span>Velocity of B after collision</span><strong id="v2">—</strong></div>
+      <div class="stat"><span>Total kinetic energy</span><strong id="energy">—</strong></div>
+    </div>
+    <p class="note" id="status">Press Play to start. The results are calculated using conservation of momentum and kinetic energy.</p>
+  </section>
+</main>
+<script>
+(() => {
+  const canvas = document.getElementById('scene');
+  const ctx = canvas.getContext('2d');
+  const ids = ['m1','m2','u1','u2'];
+  const el = id => document.getElementById(id);
+  let state, running = false, last = 0, raf = null;
+  const radius = 22, scale = 34;
+
+  function values() {
+    return Object.fromEntries(ids.map(id => [id, Number(el(id).value)]));
+  }
+  function collision(v) {
+    const {m1,m2,u1,u2} = v;
+    return {
+      v1: ((m1-m2)*u1 + 2*m2*u2)/(m1+m2),
+      v2: (2*m1*u1 + (m2-m1)*u2)/(m1+m2)
+    };
+  }
+  function updateLabels() {
+    ids.forEach(id => el(id+'v').textContent = el(id).value + (id[0]==='m' ? ' kg' : ' m/s'));
+  }
+  function reset() {
+    stop();
+    const v = values();
+    state = {x1:110, x2:canvas.clientWidth-110, u1:v.u1, u2:v.u2, collided:false, elapsed:0};
+    // Keep the starting positions apart and make the initial setup easy to see.
+    draw(); updateResults();
+  }
+  function updateResults() {
+    const v = values(), after = collision(v);
+    el('v1').textContent = after.v1.toFixed(2)+' m/s';
+    el('v2').textContent = after.v2.toFixed(2)+' m/s';
+    const ke = 0.5*v.m1*v.u1*v.u1 + 0.5*v.m2*v.u2*v.u2;
+    el('energy').textContent = ke.toFixed(2)+' J';
+  }
+  function sizeCanvas() {
+    const rect = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(rect.width*dpr); canvas.height = Math.round(rect.height*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    if (state) { state.x1 = Math.min(state.x1, rect.width/2-radius-4); state.x2 = Math.max(state.x2, rect.width/2+radius+4); draw(); }
+  }
+  function draw() {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    ctx.clearRect(0,0,w,h);
+    const y = h*0.62;
+    ctx.strokeStyle='#94a3b8'; ctx.lineWidth=3; ctx.beginPath(); ctx.moveTo(24,y+radius+7); ctx.lineTo(w-24,y+radius+7); ctx.stroke();
+    for(let x=30;x<w-20;x+=30){ctx.strokeStyle='#d5dde8';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(x,y+radius+7);ctx.lineTo(x,y+radius+13);ctx.stroke();}
+    ball(state.x1,y,'#2563eb','A'); ball(state.x2,y,'#f59e0b','B');
+    ctx.fillStyle='#64748b';ctx.font='13px Arial';ctx.textAlign='center';
+    ctx.fillText('← left',45,28);ctx.fillText('right →',w-48,28);
+    if(state.collided){ctx.fillStyle='#0f766e';ctx.font='bold 14px Arial';ctx.fillText('Collision!',w/2,35);}
+  }
+  function ball(x,y,color,label){
+    ctx.beginPath();ctx.arc(x,y,radius,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+    ctx.beginPath();ctx.arc(x-7,y-8,6,0,Math.PI*2);ctx.fillStyle='#ffffff55';ctx.fill();
+    ctx.fillStyle='white';ctx.font='bold 16px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(label,x,y+1);
+  }
+  function advance(dt) {
+    const v=values(), w=canvas.clientWidth;
+    const factor=scale;
+    state.x1 += state.u1*factor*dt;
+    state.x2 += state.u2*factor*dt;
+    // Resolve the instant the balls touch.
+    if(!state.collided && state.x1+radius >= state.x2-radius && state.u1>state.u2){
+      state.x1 = state.x2-2*radius;
+      const after=collision(v); state.u1=after.v1; state.u2=after.v2; state.collided=true;
+      el('status').textContent='The balls have collided. Their velocities changed while total momentum and kinetic energy are conserved.';
+    }
+    // Soft boundaries keep the balls visible; they do not affect the collision calculation.
+    if(state.x1<radius+5){state.x1=radius+5;state.u1=Math.abs(state.u1);}
+    if(state.x1>w-radius-5){state.x1=w-radius-5;state.u1=-Math.abs(state.u1);}
+    if(state.x2<radius+5){state.x2=radius+5;state.u2=Math.abs(state.u2);}
+    if(state.x2>w-radius-5){state.x2=w-radius-5;state.u2=-Math.abs(state.u2);}
+    state.elapsed+=dt; draw();
+  }
+  function tick(t){
+    if(!running)return;
+    const dt=Math.min((t-last)/1000||0,0.035); last=t;
+    advance(dt); raf=requestAnimationFrame(tick);
+  }
+  function stop(){running=false; if(raf)cancelAnimationFrame(raf);raf=null;el('play').textContent='▶ Play';}
+  el('play').addEventListener('click',()=>{if(running){stop();}else{if(!state)reset();running=true;last=performance.now();el('play').textContent='Ⅱ Pause';raf=requestAnimationFrame(tick);}});
+  el('step').addEventListener('click',()=>{stop();if(!state)reset();advance(0.05);});
+  el('reset').addEventListener('click',reset);
+  ids.forEach(id=>el(id).addEventListener('input',()=>{updateLabels();reset();updateResults();el('status').textContent='Settings updated. Press Play to run the simulation.';}));
+  window.addEventListener('resize',sizeCanvas);
+  updateLabels(); sizeCanvas(); reset();
+})();
+</script>
+</body>
+</html>
